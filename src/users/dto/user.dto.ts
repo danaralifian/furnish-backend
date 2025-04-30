@@ -6,6 +6,7 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
+import { Role } from 'src/shared/enum/roles';
 
 const passwordRegEx =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,20}$/;
@@ -37,4 +38,6 @@ export class UserDto {
   })
   @Exclude() //not appear field in response
   password: string;
+
+  role: Role;
 }
