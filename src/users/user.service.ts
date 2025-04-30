@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
-import { calculatePagination } from 'src/shared/utils/calculate-pagination';
+import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
 import { plainToInstance } from 'class-transformer';
-import { result } from 'src/shared/utils/response-result';
 import { UserDto } from './dto/user.dto';
+import { IResponse } from 'src/shared/interfaces/response';
+import { paginate } from 'src/common/helpers/paginate';
 
 @Injectable()
 export class UserService {
@@ -24,13 +25,13 @@ export class UserService {
    * we have defined what are the keys we are expecting from body
    * @returns promise of user
    */
-  async create(createUserDto: UserDto): Promise<IResult<User>> {
+  async create(createUserDto: UserDto): Promise<IResponse<User>> {
     const user: User = new User();
     user.email = createUserDto.email;
     user.username = createUserDto.username;
     user.password = createUserDto.password;
     const createdUser = await this.userRepository.save(user);
-    return result(createdUser);
+    return paginate(createdUser);
   }
 
   /**
@@ -40,7 +41,7 @@ export class UserService {
   async findAll(
     page: number = 1,
     limit: number = 10,
-  ): Promise<IResult<UserDto[]>> {
+  ): Promise<IResponse<UserDto[]>> {
     const skip = (page - 1) * limit; //offset
 
     const [users, total] = await this.userRepository.findAndCount({
@@ -49,7 +50,7 @@ export class UserService {
     });
     const pagination = calculatePagination(total, page, limit);
 
-    return result(
+    return paginate(
       plainToInstance(UserDto, users, {
         excludeExtraneousValues: true,
       }),
@@ -57,9 +58,9 @@ export class UserService {
     );
   }
 
-  async findOne(id: number): Promise<IResult<User | null>> {
+  async findOne(id: number): Promise<IResponse<User | null>> {
     const user = await this.userRepository.findOneBy({ id });
-    return result(user);
+    return paginate(user);
   }
 
   /**
@@ -72,13 +73,13 @@ export class UserService {
   async update(
     id: number,
     updateUserDto: UserDto,
-  ): Promise<IResult<UpdateResult>> {
+  ): Promise<IResponse<UpdateResult>> {
     const user: User = new User();
     user.email = updateUserDto.email;
     user.username = updateUserDto.username;
     user.password = updateUserDto.password;
     const updatedUser = await this.userRepository.update(id, user);
-    return result(updatedUser);
+    return paginate(updatedUser);
   }
 
   /**
@@ -86,12 +87,14 @@ export class UserService {
    * @param id is the type of number, which represent id of user
    * @returns nuber of rows deleted or affected
    */
-  async remove(id: number): Promise<IResult<{ affected?: number | null }>> {
+  async remove(
+    id: number,
+  ): Promise<IResponse<{ affected?: number | null; message?: string }>> {
     const deletedUser = await this.userRepository.delete(id);
 
     if (deletedUser.affected === 0) {
-      return result({ affected: 0, message: 'User not found' });
+      return paginate({ affected: 0, message: 'User not found' });
     }
-    return result({ affected: deletedUser.affected });
+    return paginate({ affected: deletedUser.affected });
   }
 }

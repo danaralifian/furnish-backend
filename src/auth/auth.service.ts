@@ -6,7 +6,8 @@ import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { result } from 'src/shared/utils/response-result';
+import { IResponse } from 'src/shared/interfaces/response';
+import { paginate } from 'src/common/helpers/paginate';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<AuthDto> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<IResponse<AuthDto>> {
     const user = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new BadRequestException('User not found');
@@ -25,10 +29,10 @@ export class AuthService {
     if (!isMatch) {
       throw new BadRequestException('Password does not match');
     }
-    return user;
+    return paginate(user);
   }
 
-  async signUp(auth: AuthDto): Promise<IResult<AuthDto>> {
+  async signUp(auth: AuthDto): Promise<IResponse<AuthDto>> {
     const user: User = new User();
     const existingUser = await this.userRepository.findOneBy({
       email: auth.email,
@@ -47,10 +51,10 @@ export class AuthService {
     return this.signIn(auth);
   }
 
-  async signIn(auth: AuthDto): Promise<IResult<AuthDto>> {
+  async signIn(auth: AuthDto): Promise<IResponse<AuthDto>> {
     const payload = { email: auth.email };
 
-    return result({
+    return paginate({
       ...auth,
       accessToken: this.jwtService.sign(payload),
     });
