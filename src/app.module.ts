@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './users/user.module';
 import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { ProductsModule } from './products/products.module';
+import { Product } from './products/entities/product.entity';
 
 @Module({
   imports: [
@@ -22,10 +24,11 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.SUPABASE_DB,
       autoLoadEntities: process.env.SUPABASE_ENVIRONTMENT === 'development', // Set to false in production
       synchronize: true,
-      entities: [User],
+      entities: [User, Product],
     }),
     UserModule,
     AuthModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [
