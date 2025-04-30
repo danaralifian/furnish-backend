@@ -2,20 +2,21 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
+import { ROLES_KEY } from './roles.decorator';
 
 @Injectable()
-export class JwtGuard extends AuthGuard('jwt') {
+export class RolesGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
     super();
   }
   canActivate(
     context: ExecutionContext,
   ): Promise<boolean> | boolean | Observable<boolean> {
-    const isPublic = this.reflector.getAllAndOverride('isPublic', [
+    const requiredRoles = this.reflector.getAllAndOverride(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) return true;
+    if (!requiredRoles) return true;
     return super.canActivate(context);
   }
 }
