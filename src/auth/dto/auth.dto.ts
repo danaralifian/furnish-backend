@@ -1,7 +1,11 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 export class AuthDto {
+  @Expose()
+  id: number;
+
+  @Expose()
   @IsNotEmpty({ message: 'Email is required.' })
   @IsEmail({}, { message: 'Please provide valid Email.' })
   email: string;
@@ -11,5 +15,6 @@ export class AuthDto {
   @Exclude()
   password: string;
 
+  @Expose()
   accessToken?: string;
 }

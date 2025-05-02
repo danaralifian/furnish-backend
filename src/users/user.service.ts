@@ -6,7 +6,7 @@ import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
 import { instanceToPlain } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
-import { IResponse } from 'src/shared/interfaces/response';
+import { IDelete, IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
 
 @Injectable()
@@ -82,9 +82,7 @@ export class UserService {
    * @param id is the type of number, which represent id of user
    * @returns nuber of rows deleted or affected
    */
-  async remove(
-    id: number,
-  ): Promise<IResponse<{ affected?: number | null; message?: string }>> {
+  async remove(id: number): Promise<IResponse<IDelete>> {
     const deletedUser = await this.userRepository.delete(id);
 
     if (deletedUser.affected === 0) {
