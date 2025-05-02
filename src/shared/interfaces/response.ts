@@ -16,3 +16,8 @@ export interface IResponse<T> {
   error?: IError;
   pagination?: IPagination | null;
 }
+
+export interface IDelete {
+  affected?: number | null;
+  message?: string;
+}

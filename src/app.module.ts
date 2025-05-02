@@ -8,6 +8,8 @@ import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { Product } from './products/entities/product.entity';
+import { CategoriesModule } from './categories/categories.module';
+import { Category } from './categories/entities/category.entity';
 
 @Module({
   imports: [
@@ -24,20 +26,14 @@ import { Product } from './products/entities/product.entity';
       database: process.env.SUPABASE_DB,
       autoLoadEntities: process.env.SUPABASE_ENVIRONTMENT === 'development', // Set to false in production
       synchronize: true,
-      entities: [User, Product],
+      entities: [User, Product, Category],
     }),
     UserModule,
     AuthModule,
     ProductsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtGuard,
-    // },
-    //JwtStrategy,
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
