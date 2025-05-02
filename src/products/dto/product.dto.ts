@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { IsNotEmpty, MinLength } from 'class-validator';
+import { ToNumber } from 'src/common/helpers/transformers';
 
 @Expose()
 export class ProductDto {
@@ -21,9 +22,15 @@ export class ProductDto {
   @IsNotEmpty()
   stock: number;
 
-  created_at: number;
+  @Expose({ name: 'created_at' })
+  @ToNumber()
+  createdAt: number;
 
-  updated_at: number;
+  @Expose({ name: 'updated_at' })
+  @ToNumber()
+  updatedAt: number;
 
-  deleted_at: number;
+  @Expose({ name: 'deleted_at' })
+  @ToNumber()
+  deletedAt: number;
 }
