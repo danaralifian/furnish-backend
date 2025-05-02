@@ -1,6 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Expose } from 'class-transformer';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('products')
+@Expose()
 export class Product {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,12 +22,17 @@ export class Product {
   @Column({ type: 'int' })
   stock: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'bigint', default: 0 })
   created_at: number;
 
-  @Column({ type: 'timestamp' })
+  @BeforeInsert()
+  setCreatedAt() {
+    this.created_at = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
+  }
+
+  @Column({ type: 'bigint', default: 0 })
   updated_at: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'bigint', default: 0 })
   deleted_at: number;
 }

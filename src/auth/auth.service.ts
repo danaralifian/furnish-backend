@@ -7,7 +7,7 @@ import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { IResponse } from 'src/shared/interfaces/response';
-import { paginate } from 'src/common/helpers/paginate';
+import { formatResponse } from 'src/common/helpers/format-response';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
     if (!isMatch) {
       throw new BadRequestException('Password does not match');
     }
-    return paginate(user);
+    return formatResponse(user, AuthDto);
   }
 
   async signUp(auth: AuthDto): Promise<IResponse<AuthDto>> {
@@ -54,9 +54,12 @@ export class AuthService {
   async signIn(auth: AuthDto): Promise<IResponse<AuthDto>> {
     const payload = { email: auth.email };
 
-    return paginate({
-      ...auth,
-      accessToken: this.jwtService.sign(payload),
-    });
+    return formatResponse(
+      {
+        ...auth,
+        accessToken: this.jwtService.sign(payload),
+      },
+      AuthDto,
+    );
   }
 }

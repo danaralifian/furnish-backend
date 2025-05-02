@@ -4,8 +4,8 @@ import { IResponse } from 'src/shared/interfaces/response';
 import { Product } from './entities/product.entity';
 import { plainToInstance } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
-import { paginate } from 'src/common/helpers/paginate';
+import { Repository } from 'typeorm';
+import { formatResponse } from 'src/common/helpers/format-response';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
 @Injectable()
@@ -19,16 +19,16 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async create(createProductDto: ProductDto): Promise<IResponse<Product>> {
+  async create(createProductDto: ProductDto): Promise<IResponse<ProductDto>> {
     const product = plainToInstance(Product, createProductDto);
     const createdProduct = await this.productRepository.save(product);
-    return paginate(createdProduct);
+    return formatResponse(createdProduct, ProductDto);
   }
 
   async findAll(
     page: number = 1,
     limit: number = 10,
-  ): Promise<IResponse<Product[]>> {
+  ): Promise<IResponse<ProductDto>> {
     const skip = (page - 1) * limit; //offset
     const [products, total] = await this.productRepository.findAndCount({
       take: limit,
@@ -37,21 +37,21 @@ export class ProductsService {
 
     const pagination = calculatePagination(total, page, limit);
 
-    return paginate(products, pagination);
+    return formatResponse(products, ProductDto, pagination);
   }
 
-  async findOne(id: number): Promise<IResponse<Product | null>> {
+  async findOne(id: number): Promise<IResponse<ProductDto>> {
     const product = await this.productRepository.findOneBy({ id });
-    return paginate(product);
+    return formatResponse(product, ProductDto);
   }
 
   async update(
     id: number,
     updateProductDto: ProductDto,
-  ): Promise<IResponse<UpdateResult>> {
+  ): Promise<IResponse<ProductDto>> {
     const product = plainToInstance(Product, updateProductDto);
     const updatedProduct = await this.productRepository.update(id, product);
-    return paginate(updatedProduct);
+    return formatResponse(updatedProduct, ProductDto);
   }
 
   async remove(
@@ -60,8 +60,8 @@ export class ProductsService {
     const deletedUser = await this.productRepository.delete(id);
 
     if (deletedUser.affected === 0) {
-      return paginate({ affected: 0, message: 'User not found' });
+      return formatResponse({ affected: 0, message: 'User not found' });
     }
-    return paginate({ affected: deletedUser.affected });
+    return formatResponse({ affected: deletedUser.affected });
   }
 }

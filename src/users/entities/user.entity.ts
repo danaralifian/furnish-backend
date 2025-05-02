@@ -20,4 +20,13 @@ export class User {
 
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: string;
+
+  @Column({ type: 'bigint', default: 0 })
+  created_at: number;
+
+  @Column({ type: 'bigint', default: null })
+  updated_at: number;
+
+  @Column({ type: 'bigint', default: null })
+  deleted_at: number;
 }

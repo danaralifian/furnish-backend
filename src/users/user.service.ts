@@ -4,10 +4,10 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
-import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { instanceToPlain } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
 import { IResponse } from 'src/shared/interfaces/response';
-import { paginate } from 'src/common/helpers/paginate';
+import { formatResponse } from 'src/common/helpers/format-response';
 
 @Injectable()
 export class UserService {
@@ -25,10 +25,10 @@ export class UserService {
    * we have defined what are the keys we are expecting from body
    * @returns promise of user
    */
-  async create(createUserDto: UserDto): Promise<IResponse<User>> {
+  async create(createUserDto: UserDto): Promise<IResponse<UserDto>> {
     const user = instanceToPlain(createUserDto);
     const createdUser = await this.userRepository.save(user);
-    return paginate(createdUser);
+    return formatResponse(createdUser, UserDto);
   }
 
   /**
@@ -38,7 +38,7 @@ export class UserService {
   async findAll(
     page: number = 1,
     limit: number = 10,
-  ): Promise<IResponse<UserDto[]>> {
+  ): Promise<IResponse<UserDto>> {
     const skip = (page - 1) * limit; //offset
 
     const [users, total] = await this.userRepository.findAndCount({
@@ -47,17 +47,12 @@ export class UserService {
     });
     const pagination = calculatePagination(total, page, limit);
 
-    return paginate(
-      plainToInstance(UserDto, users, {
-        excludeExtraneousValues: true,
-      }),
-      pagination,
-    );
+    return formatResponse(users, UserDto, pagination);
   }
 
-  async findOne(id: number): Promise<IResponse<User | null>> {
+  async findOne(id: number): Promise<IResponse<UserDto>> {
     const user = await this.userRepository.findOneBy({ id });
-    return paginate(user);
+    return formatResponse(user, UserDto);
   }
 
   /**
@@ -67,7 +62,10 @@ export class UserService {
    * @param updateUserDto this is partial type of createUserDto.
    * @returns promise of udpate user
    */
-  async update(id: number, updateUserDto: UserDto): Promise<IResponse<User>> {
+  async update(
+    id: number,
+    updateUserDto: UserDto,
+  ): Promise<IResponse<UserDto>> {
     const user = instanceToPlain(updateUserDto);
     await this.userRepository.update(id, user);
     const updatedUser = await this.userRepository.findOneBy({ id });
@@ -76,7 +74,7 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return paginate(updatedUser);
+    return formatResponse(updatedUser, UserDto);
   }
 
   /**
@@ -90,8 +88,8 @@ export class UserService {
     const deletedUser = await this.userRepository.delete(id);
 
     if (deletedUser.affected === 0) {
-      return paginate({ affected: 0, message: 'User not found' });
+      return formatResponse({ affected: 0, message: 'User not found' });
     }
-    return paginate({ affected: deletedUser.affected });
+    return formatResponse({ affected: deletedUser.affected });
   }
 }

@@ -6,6 +6,7 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
+import { ToNumber } from 'src/common/helpers/transformers';
 import { Role } from 'src/shared/enum/roles';
 
 const passwordRegEx =
@@ -39,5 +40,18 @@ export class UserDto {
   @Exclude() //not appear field in response
   password: string;
 
+  @Expose()
   role: Role;
+
+  @Expose({ name: 'created_at' })
+  @ToNumber()
+  createdAt: number;
+
+  @Expose({ name: 'updated_at' })
+  @ToNumber()
+  updatedAt: number;
+
+  @Expose({ name: 'deleted_at' })
+  @ToNumber()
+  deletedAt: number;
 }
