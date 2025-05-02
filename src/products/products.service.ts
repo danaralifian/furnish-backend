@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ProductDto } from './dto/product.dto';
-import { IResponse } from 'src/shared/interfaces/response';
+import { IDelete, IResponse } from 'src/shared/interfaces/response';
 import { Product } from './entities/product.entity';
 import { plainToInstance } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -54,9 +54,7 @@ export class ProductsService {
     return formatResponse(updatedProduct, ProductDto);
   }
 
-  async remove(
-    id: number,
-  ): Promise<IResponse<{ affected?: number | null; message?: string }>> {
+  async remove(id: number): Promise<IResponse<IDelete>> {
     const deletedUser = await this.productRepository.delete(id);
 
     if (deletedUser.affected === 0) {
