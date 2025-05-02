@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global exception filter
-  //app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global interceptors to transform response
   app.useGlobalInterceptors(new TransformInterceptor());
@@ -24,4 +24,8 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 5001);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Error during bootstrap:', error);
+  process.exit(1);
+});

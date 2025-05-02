@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
-import { plainToInstance } from 'class-transformer';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
 import { IResponse } from 'src/shared/interfaces/response';
 import { paginate } from 'src/common/helpers/paginate';
@@ -26,10 +26,7 @@ export class UserService {
    * @returns promise of user
    */
   async create(createUserDto: UserDto): Promise<IResponse<User>> {
-    const user: User = new User();
-    user.email = createUserDto.email;
-    user.username = createUserDto.username;
-    user.password = createUserDto.password;
+    const user = instanceToPlain(createUserDto);
     const createdUser = await this.userRepository.save(user);
     return paginate(createdUser);
   }
@@ -70,15 +67,15 @@ export class UserService {
    * @param updateUserDto this is partial type of createUserDto.
    * @returns promise of udpate user
    */
-  async update(
-    id: number,
-    updateUserDto: UserDto,
-  ): Promise<IResponse<UpdateResult>> {
-    const user: User = new User();
-    user.email = updateUserDto.email;
-    user.username = updateUserDto.username;
-    user.password = updateUserDto.password;
-    const updatedUser = await this.userRepository.update(id, user);
+  async update(id: number, updateUserDto: UserDto): Promise<IResponse<User>> {
+    const user = instanceToPlain(updateUserDto);
+    await this.userRepository.update(id, user);
+    const updatedUser = await this.userRepository.findOneBy({ id });
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
     return paginate(updatedUser);
   }
 

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IResponse } from 'src/shared/interfaces/response';
+import { IPagination, IResponse } from 'src/shared/interfaces/response';
 
 @Injectable()
 export class TransformInterceptor<T>
@@ -17,11 +17,13 @@ export class TransformInterceptor<T>
     next: CallHandler,
   ): Observable<IResponse<T>> {
     return next.handle().pipe(
-      map((response) => {
+      map((response: { data: T; pagination?: IPagination }) => {
         const { data, pagination } = response;
 
         return {
-          statusCode: context.switchToHttp().getResponse().statusCode,
+          statusCode: context
+            .switchToHttp()
+            .getResponse<{ statusCode: number }>().statusCode,
           data,
           pagination: pagination || null, // fallback if response doesn't have pagination
         };

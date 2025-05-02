@@ -12,7 +12,7 @@ export class RolesGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): Promise<boolean> | boolean | Observable<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride(ROLES_KEY, [
+    const requiredRoles: unknown = this.reflector.getAllAndOverride(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
