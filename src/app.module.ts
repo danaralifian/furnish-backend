@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { Product } from './products/entities/product.entity';
 import { CategoriesModule } from './categories/categories.module';
 import { Category } from './categories/entities/category.entity';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { Category } from './categories/entities/category.entity';
     AuthModule,
     ProductsModule,
     CategoriesModule,
+    CheckoutModule,
   ],
   controllers: [AppController],
   providers: [AppService],
