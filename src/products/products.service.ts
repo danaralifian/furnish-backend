@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { formatResponse } from 'src/common/helpers/format-response';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
+import { generateUniqueSlug } from 'src/common/helpers/generate-slug';
 
 @Injectable()
 export class ProductsService {
@@ -20,7 +21,11 @@ export class ProductsService {
   ) {}
 
   async create(createProductDto: ProductDto): Promise<IResponse<ProductDto>> {
-    const product = plainToInstance(Product, createProductDto);
+    const slug = await generateUniqueSlug(
+      this.productRepository,
+      createProductDto.name,
+    );
+    const product = plainToInstance(Product, { ...createProductDto, slug });
     const createdProduct = await this.productRepository.save(product);
     return formatResponse(createdProduct, ProductDto);
   }

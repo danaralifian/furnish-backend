@@ -1,24 +1,38 @@
 import { Expose } from 'class-transformer';
-import { IsNotEmpty, MinLength } from 'class-validator';
+import { IsNotEmpty, MinLength, ValidateNested } from 'class-validator';
 import { ToNumber } from 'src/common/helpers/transformers';
 
-@Expose()
+class ImageItemDto {
+  @Expose()
+  url: string;
+
+  @Expose()
+  alt: string;
+}
+
 export class ProductDto {
+  @Expose()
   id: number;
 
+  @Expose()
   @IsNotEmpty()
   name: string;
 
+  @Expose()
   @IsNotEmpty()
   @MinLength(3, { message: 'Description must have atleast 3 characters.' })
   description: string;
 
+  @Expose()
   @IsNotEmpty()
-  images: string;
+  @ValidateNested({ each: true })
+  images: ImageItemDto[];
 
+  @Expose()
   @IsNotEmpty()
   price: number;
 
+  @Expose()
   @IsNotEmpty()
   stock: number;
 
