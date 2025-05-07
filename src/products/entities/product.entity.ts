@@ -25,17 +25,17 @@ export class Product {
   @Column({ type: 'int' })
   stock: number;
 
-  @Column({ type: 'bigint', default: 0 })
-  created_at: number;
+  @Column({ name: 'created_at', type: 'bigint', default: 0 })
+  createdAt: number;
 
   @BeforeInsert()
   setCreatedAt() {
-    this.created_at = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
+    this.createdAt = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
   }
 
-  @Column({ type: 'bigint', default: 0 })
-  updated_at: number;
+  @Column({ name: 'updated_at', type: 'bigint', default: 0 })
+  updatedAt: number;
 
-  @Column({ type: 'bigint', default: 0 })
-  deleted_at: number;
+  @Column({ name: 'deleted_at', type: 'bigint', default: 0 })
+  deletedAt: number;
 }
