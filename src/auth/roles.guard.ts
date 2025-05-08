@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { ROLES_KEY } from './roles.decorator';
+import { Role } from 'src/shared/enum/roles';
 
 @Injectable()
 export class RolesGuard extends AuthGuard('jwt') {
@@ -16,7 +17,14 @@ export class RolesGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
+
     if (!requiredRoles) return true;
-    return super.canActivate(context);
+
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user: { role: Role } }>();
+    const user = request.user as { role: Role };
+
+    return (requiredRoles as Role[]).includes(user.role);
   }
 }
