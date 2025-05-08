@@ -12,7 +12,7 @@ export class AuthDto {
 
   @IsNotEmpty({ message: 'Password is required.' })
   @MinLength(8, { message: 'Password must have atleast 8 characters.' })
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @Expose()

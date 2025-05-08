@@ -1,5 +1,5 @@
 import { Role } from 'src/shared/enum/roles';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -21,12 +21,16 @@ export class User {
   @Column({ type: 'enum', enum: Role, default: Role.User })
   role: string;
 
-  @Column({ type: 'bigint', default: 0 })
-  created_at: number;
+  @Column({ name: 'created_at', type: 'bigint', default: 0 })
+  createdAt: number;
+  @BeforeInsert()
+  setCreatedAt() {
+    this.createdAt = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
+  }
 
-  @Column({ type: 'bigint', default: null })
-  updated_at: number;
+  @Column({ name: 'updated_at', type: 'bigint', default: null })
+  updatedAt: number;
 
-  @Column({ type: 'bigint', default: null })
-  deleted_at: number;
+  @Column({ name: 'deleted_at', type: 'bigint', default: null })
+  deletedAt: number;
 }
