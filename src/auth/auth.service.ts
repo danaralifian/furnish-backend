@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -17,19 +18,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(
-    email: string,
-    password: string,
-  ): Promise<IResponse<AuthDto>> {
+  async validateUser(email: string, password: string): Promise<AuthDto> {
     const user = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new BadRequestException('User not found');
     }
+
     const isMatch: boolean = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
       throw new BadRequestException('Password does not match');
     }
-    return formatResponse(user, AuthDto);
+    return user;
   }
 
   async signUp(auth: AuthDto): Promise<IResponse<AuthDto>> {
@@ -41,7 +40,7 @@ export class AuthService {
       throw new BadRequestException('email already exists');
     }
 
-    const hashedPassword = bcrypt.hashSync(auth.password, 10);
+    const hashedPassword = await bcrypt.hash(auth.password, 10);
     user.email = auth.email;
     user.username = auth.email.split('@')[0];
     user.password = hashedPassword;
@@ -52,11 +51,12 @@ export class AuthService {
   }
 
   async signIn(auth: AuthDto): Promise<IResponse<AuthDto>> {
-    const payload = { email: auth.email };
+    const user = await this.validateUser(auth.email, auth.password);
+    const payload = instanceToPlain(user);
 
     return formatResponse(
       {
-        ...auth,
+        ...payload,
         accessToken: this.jwtService.sign(payload),
       },
       AuthDto,
