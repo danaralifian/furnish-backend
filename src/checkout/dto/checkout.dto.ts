@@ -26,14 +26,15 @@ export class CheckoutItem {
   total: number;
 }
 
-export class CheckoutDto {
+export class CheckoutOrderDto {
+  @IsNotEmpty()
+  sellerId: number;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CheckoutItem) // Required for nested validation
   items: CheckoutItem[];
-}
 
-export class CheckoutResponseDto extends CheckoutDto {
   @Expose()
   subtotal: number;
 
@@ -42,4 +43,16 @@ export class CheckoutResponseDto extends CheckoutDto {
 
   @Expose()
   total: number;
+}
+
+export class CheckoutDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CheckoutOrderDto) // Required for nested validation
+  orders: CheckoutOrderDto[];
+}
+
+export class CheckoutResponseDto extends CheckoutDto {
+  @Expose()
+  totalAmount: number;
 }

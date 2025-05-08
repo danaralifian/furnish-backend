@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   CheckoutDto,
   CheckoutItem,
+  CheckoutOrderDto,
   CheckoutResponseDto,
 } from './dto/checkout.dto';
 import { Repository } from 'typeorm';
@@ -21,37 +22,52 @@ export class CheckoutService {
   async checkoutSummary(
     checkoutDto: CheckoutDto,
   ): Promise<IResponse<CheckoutResponseDto>> {
-    let subtotal = 0;
-    const itemDetails: CheckoutItem[] = [];
+    const orders: CheckoutOrderDto[] = [];
+    let totalAmount = 0;
 
-    for (const item of checkoutDto.items) {
-      const product = await this.productRepository.findOne({
-        where: { id: item.productId },
+    //loop orders by seller
+    for (const order of checkoutDto.orders) {
+      let subtotal = 0;
+      const itemDetails: CheckoutItem[] = [];
+
+      //loop order.items by items seller
+      for (const item of order.items) {
+        const product = await this.productRepository.findOne({
+          where: { id: item.productId },
+        });
+
+        if (!product) throw new Error(`Product ID ${item.productId} not found`);
+
+        const unitPrice = Number(product.price);
+        const quantity = item.quantity;
+        const totalPrice = unitPrice * quantity;
+        subtotal += totalPrice;
+        itemDetails.push({
+          productId: item.productId,
+          name: product.name,
+          unitPrice,
+          quantity: quantity,
+          total: totalPrice,
+        });
+      }
+
+      const taxFee = subtotal * TAX;
+      const total = subtotal + taxFee;
+
+      orders.push({
+        items: itemDetails,
+        sellerId: order.sellerId,
+        subtotal,
+        tax: taxFee,
+        total,
       });
 
-      if (!product) throw new Error(`Product ID ${item.productId} not found`);
-
-      const price = Number(product.price);
-      const quantity = item.quantity;
-      const total = price * quantity;
-      subtotal += total;
-      itemDetails.push({
-        productId: item.productId,
-        name: product.name,
-        unitPrice: price,
-        quantity: quantity,
-        total: total,
-      });
+      totalAmount += total;
     }
 
-    const tax = subtotal * TAX;
-    const total = subtotal + tax;
-
     return formatResponse({
-      items: itemDetails,
-      subtotal,
-      tax,
-      total,
+      orders,
+      totalAmount,
     });
   }
 }
