@@ -14,7 +14,7 @@ const passwordRegEx =
 
 export class UserDto {
   @Expose()
-  id: string;
+  id: number;
 
   @IsNotEmpty()
   @MinLength(3, { message: 'Username must have atleast 3 characters.' })

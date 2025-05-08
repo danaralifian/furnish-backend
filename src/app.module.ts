@@ -11,6 +11,8 @@ import { Product } from './products/entities/product.entity';
 import { CategoriesModule } from './categories/categories.module';
 import { Category } from './categories/entities/category.entity';
 import { CheckoutModule } from './checkout/checkout.module';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
 
 @Module({
   imports: [
@@ -27,13 +29,14 @@ import { CheckoutModule } from './checkout/checkout.module';
       database: process.env.SUPABASE_DB,
       autoLoadEntities: process.env.SUPABASE_ENVIRONTMENT === 'development', // Set to false in production
       synchronize: true,
-      entities: [User, Product, Category],
+      entities: [User, Product, Category, Order],
     }),
     UserModule,
     AuthModule,
     ProductsModule,
     CategoriesModule,
     CheckoutModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
