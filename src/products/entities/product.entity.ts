@@ -1,9 +1,10 @@
 import { Expose } from 'class-transformer';
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseColumnEntity } from 'src/shared/entities/base.column.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('products')
 @Expose()
-export class Product {
+export class Product extends BaseColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -24,18 +25,4 @@ export class Product {
 
   @Column({ type: 'int' })
   stock: number;
-
-  @Column({ name: 'created_at', type: 'bigint', default: 0 })
-  createdAt: number;
-
-  @BeforeInsert()
-  setCreatedAt() {
-    this.createdAt = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
-  }
-
-  @Column({ name: 'updated_at', type: 'bigint', default: 0 })
-  updatedAt: number;
-
-  @Column({ name: 'deleted_at', type: 'bigint', default: 0 })
-  deletedAt: number;
 }

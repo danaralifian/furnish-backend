@@ -6,16 +6,13 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { ToNumber } from 'src/common/helpers/transformers';
+import { BaseDto } from 'src/shared/dto/base.dto';
 import { Role } from 'src/shared/enum/roles';
 
 const passwordRegEx =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,20}$/;
 
-export class UserDto {
-  @Expose()
-  id: number;
-
+export class UserDto extends BaseDto {
   @IsNotEmpty()
   @MinLength(3, { message: 'Username must have atleast 3 characters.' })
   @IsAlphanumeric('en-US', {
@@ -42,16 +39,4 @@ export class UserDto {
 
   @Expose()
   role: Role;
-
-  @Expose({ name: 'created_at' })
-  @ToNumber()
-  createdAt: number;
-
-  @Expose({ name: 'updated_at' })
-  @ToNumber()
-  updatedAt: number;
-
-  @Expose({ name: 'deleted_at' })
-  @ToNumber()
-  deletedAt: number;
 }
