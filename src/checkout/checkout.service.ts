@@ -27,7 +27,7 @@ export class CheckoutService {
 
     //loop orders by seller
     for (const order of checkoutDto.orders) {
-      let subtotal = 0;
+      let subTotal = 0;
       const itemDetails: CheckoutItem[] = [];
 
       //loop order.items by items seller
@@ -41,7 +41,7 @@ export class CheckoutService {
         const unitPrice = Number(product.price);
         const quantity = item.quantity;
         const totalPrice = unitPrice * quantity;
-        subtotal += totalPrice;
+        subTotal += totalPrice;
         itemDetails.push({
           productId: item.productId,
           name: product.name,
@@ -51,13 +51,13 @@ export class CheckoutService {
         });
       }
 
-      const taxFee = subtotal * TAX;
-      const total = subtotal + taxFee;
+      const taxFee = subTotal * TAX;
+      const total = subTotal + taxFee;
 
       orders.push({
         items: itemDetails,
         sellerId: order.sellerId,
-        subtotal,
+        subTotal,
         tax: taxFee,
         total,
       });

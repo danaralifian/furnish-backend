@@ -40,7 +40,7 @@ export class CheckoutOrderDto {
   items: CheckoutItem[];
 
   @Expose()
-  subtotal: number;
+  subTotal: number;
 
   @Expose()
   tax: number;
