@@ -7,7 +7,7 @@ import { IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
 import { UserDto } from 'src/users/dto/user.dto';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
-import { Invoice } from './entities/invoice.entity';
+import { Invoice } from '../invoices/entities/invoice.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { generateCustomId } from 'src/common/helpers/generated-id';
 import { PREFIX_GENERATED_ID } from 'src/shared/enum/prefix-generated-id';
@@ -46,14 +46,6 @@ export class OrdersService {
       await this.checkoutService.calculateCheckoutSummary(createOrderDto);
 
     try {
-      //generate order id
-      const orderId = await generateCustomId(
-        PREFIX_GENERATED_ID.ORDER,
-        this.orderRepository,
-        new Date(),
-        'orderId',
-      );
-
       // create invoice
       invoice = queryRunner.manager.create(Invoice, {
         user,
@@ -65,6 +57,9 @@ export class OrdersService {
 
       //loop seller-level order
       for (const sellerOrder of summary.orders) {
+        //generate order id
+        const orderId = generateCustomId(PREFIX_GENERATED_ID.ORDER);
+
         //create order
         const order = queryRunner.manager.create(Order, {
           invoice,

@@ -7,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Invoice } from './invoice.entity';
+import { Invoice } from '../../invoices/entities/invoice.entity';
 import { ORDER_STATUS } from 'src/shared/enum/order-status';
 import { OrderItem } from './order-item.entity';
 
@@ -16,7 +16,7 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'order_id', type: 'varchar', length: 255 })
+  @Column({ name: 'order_id', type: 'varchar', length: 255, unique: true })
   orderId: string;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.id)
@@ -25,6 +25,9 @@ export class Order {
 
   @OneToMany(() => OrderItem, (item) => item.order)
   orderItems: OrderItem[];
+
+  @Column({ name: 'seller_id', type: 'int' })
+  sellerId: number;
 
   @Column({ type: 'enum', enum: ORDER_STATUS, default: ORDER_STATUS.PENDING })
   status: ORDER_STATUS;

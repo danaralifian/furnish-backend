@@ -1,25 +1,8 @@
-import { Repository, Entity } from 'typeorm';
+import { customAlphabet } from 'nanoid';
 
-export async function generateCustomId(
-  prefix: string,
-  repository: Repository<any>,
-  date: Date,
-  idType: string,
-): Promise<string> {
+export function generateCustomId(prefix: string): string {
+  const nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6); // 6-char random
+  const date = new Date();
   const dateString = date.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-
-  return await repository
-    .createQueryBuilder('entity')
-    .where(`entity.${idType} LIKE :prefix`, {
-      prefix: `${prefix}-${dateString}-`,
-    })
-    .orderBy(`entity.${idType}`, 'DESC')
-    .getOne()
-    .then((lastEntity: typeof Entity | null) => {
-      const lastNumber = lastEntity
-        ? parseInt((lastEntity[idType] as string).split('-')[2])
-        : 0;
-      const nextNumber = lastNumber + 1;
-      return `${prefix}-${dateString}-${nextNumber.toString().padStart(3, '0')}`;
-    });
+  return `${prefix}-${dateString}-${nanoid()}`;
 }
