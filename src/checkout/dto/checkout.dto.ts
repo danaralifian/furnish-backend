@@ -8,9 +8,11 @@ import {
 } from 'class-validator';
 
 export class CheckoutItem {
+  @Expose()
   @IsNotEmpty()
   productId: number;
 
+  @Expose()
   @IsInt()
   @IsNotEmpty()
   @Min(1, { message: 'Quantity must not be zero' })
@@ -27,9 +29,11 @@ export class CheckoutItem {
 }
 
 export class CheckoutOrderDto {
+  @Expose()
   @IsNotEmpty()
   sellerId: number;
 
+  @Expose()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CheckoutItem) // Required for nested validation
@@ -46,6 +50,7 @@ export class CheckoutOrderDto {
 }
 
 export class CheckoutDto {
+  @Expose()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CheckoutOrderDto) // Required for nested validation

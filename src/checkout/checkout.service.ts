@@ -19,9 +19,9 @@ export class CheckoutService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async checkoutSummary(
+  async calculateCheckoutSummary(
     checkoutDto: CheckoutDto,
-  ): Promise<IResponse<CheckoutResponseDto>> {
+  ): Promise<CheckoutResponseDto> {
     const orders: CheckoutOrderDto[] = [];
     let totalAmount = 0;
 
@@ -65,9 +65,16 @@ export class CheckoutService {
       totalAmount += total;
     }
 
-    return formatResponse({
+    return {
       orders,
       totalAmount,
-    });
+    };
+  }
+
+  async checkoutSummary(
+    checkoutDto: CheckoutDto,
+  ): Promise<IResponse<CheckoutResponseDto>> {
+    const summary = await this.calculateCheckoutSummary(checkoutDto);
+    return formatResponse(summary, CheckoutResponseDto);
   }
 }
