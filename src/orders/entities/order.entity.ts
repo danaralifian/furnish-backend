@@ -10,6 +10,7 @@ import {
 import { Invoice } from '../../invoices/entities/invoice.entity';
 import { ORDER_STATUS } from 'src/shared/enum/order-status';
 import { OrderItem } from './order-item.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity('orders')
 export class Order {
@@ -28,6 +29,11 @@ export class Order {
 
   @Column({ name: 'seller_id', type: 'int' })
   sellerId: number;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'user_id' })
+  @Column({ name: 'user_id', type: 'int' })
+  userId: number;
 
   @Column({ type: 'enum', enum: ORDER_STATUS, default: ORDER_STATUS.PENDING })
   status: ORDER_STATUS;

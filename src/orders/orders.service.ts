@@ -64,6 +64,7 @@ export class OrdersService {
         const order = queryRunner.manager.create(Order, {
           invoice,
           sellerId: sellerOrder.sellerId,
+          userId: user.id,
           orderId,
           subTotal: sellerOrder.subTotal,
           tax: sellerOrder.tax,
