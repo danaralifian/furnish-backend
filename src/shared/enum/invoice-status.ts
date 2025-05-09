@@ -3,4 +3,5 @@ export enum INVOICE_STATUS {
   PENDING = 'pending',
   EXPIRED = 'expired',
   FAILED = 'failed',
+  CANCELLED = 'cancelled',
 }

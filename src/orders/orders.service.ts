@@ -14,27 +14,25 @@ import { PREFIX_GENERATED_ID } from 'src/shared/enum/prefix-generated-id';
 import { CreateOrderDto } from './dto/create.order.dto';
 import { CheckoutService } from 'src/checkout/checkout.service';
 import { Product } from 'src/products/entities/product.entity';
-import { CreateOrderResponseDto } from './dto/create.order.response.dto';
+import { InvoicesService } from 'src/invoices/invoices.service';
+import { InvoiceResponseDto } from 'src/invoices/dto/invoice.response.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    @InjectRepository(Invoice)
-    private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    @InjectRepository(OrderItem)
-    private readonly orderItemRepository: Repository<OrderItem>,
 
     private readonly checkoutService: CheckoutService,
+    private readonly invoiceService: InvoicesService,
   ) {}
 
   async create(
     createOrderDto: CreateOrderDto,
     user: UserDto,
-  ): Promise<IResponse<CreateOrderResponseDto>> {
+  ): Promise<IResponse<InvoiceResponseDto>> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -64,7 +62,7 @@ export class OrdersService {
         const order = queryRunner.manager.create(Order, {
           invoice,
           sellerId: sellerOrder.sellerId,
-          userId: user.id,
+          user,
           orderId,
           subTotal: sellerOrder.subTotal,
           tax: sellerOrder.tax,
@@ -116,25 +114,7 @@ export class OrdersService {
       await queryRunner.release();
     }
 
-    const detailInvoice = await this.invoiceRepository.findOneBy({
-      id: invoice.id,
-    });
-
-    const orders = await this.orderItemRepository
-      .createQueryBuilder('item')
-      .leftJoinAndSelect('item.order', 'order')
-      .leftJoin('order.invoice', 'invoice')
-      .leftJoinAndSelect('item.product', 'product')
-      .where('invoice.id = :invoiceId', { invoiceId: invoice.id })
-      .getMany();
-
-    return formatResponse(
-      {
-        ...detailInvoice,
-        orders,
-      },
-      CreateOrderResponseDto,
-    );
+    return await this.invoiceService.findOne(invoice.id);
   }
 
   async findAll(

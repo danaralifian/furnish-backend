@@ -6,6 +6,7 @@ import { Order } from './entities/order.entity';
 import { Invoice } from '../invoices/entities/invoice.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { CheckoutModule } from 'src/checkout/checkout.module';
+import { InvoicesModule } from 'src/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CheckoutModule } from 'src/checkout/checkout.module';
     TypeOrmModule.forFeature([Order]),
     TypeOrmModule.forFeature([OrderItem]),
     CheckoutModule,
+    InvoicesModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

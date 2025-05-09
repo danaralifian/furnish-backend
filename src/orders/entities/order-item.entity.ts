@@ -1,5 +1,4 @@
 import {
-  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
@@ -8,9 +7,10 @@ import {
 } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from 'src/products/entities/product.entity';
+import { BaseColumnEntity } from 'src/shared/entities/base.column.entity';
 
 @Entity('order-items')
-export class OrderItem {
+export class OrderItem extends BaseColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -30,18 +30,4 @@ export class OrderItem {
 
   @Column({ type: 'decimal' })
   total: number;
-
-  @Column({ name: 'created_at', type: 'bigint', default: 0 })
-  createdAt: number;
-
-  @BeforeInsert()
-  setCreatedAt() {
-    this.createdAt = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
-  }
-
-  @Column({ name: 'updated_at', type: 'bigint', default: 0 })
-  updatedAt: number;
-
-  @Column({ name: 'deleted_at', type: 'bigint', default: 0 })
-  deletedAt: number;
 }

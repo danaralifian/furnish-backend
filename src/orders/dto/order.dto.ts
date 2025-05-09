@@ -2,9 +2,10 @@ import { Expose, Type } from 'class-transformer';
 import { BaseDto } from 'src/shared/dto/base.dto';
 import { ORDER_STATUS } from 'src/shared/enum/order-status';
 import { UserDto } from 'src/users/dto/user.dto';
+import { OrderItemDto } from './order-item.dto';
 
 export class OrderDto extends BaseDto {
-  @Expose({ name: 'user_id' })
+  @Expose()
   userId: number;
 
   @Expose()
@@ -13,6 +14,9 @@ export class OrderDto extends BaseDto {
 
   @Expose()
   orderId: string;
+
+  @Expose()
+  sellerId: number;
 
   @Expose()
   status: ORDER_STATUS;
@@ -28,4 +32,8 @@ export class OrderDto extends BaseDto {
 
   @Expose()
   invoiceId: number;
+
+  @Expose()
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
 }

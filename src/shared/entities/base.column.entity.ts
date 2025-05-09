@@ -9,9 +9,9 @@ export class BaseColumnEntity {
     this.createdAt = Math.floor(Date.now() / 1000); // current Unix timestamp in seconds
   }
 
-  @Column({ name: 'updated_at', type: 'bigint', default: 0 })
+  @Column({ name: 'updated_at', type: 'bigint', default: null })
   updatedAt: number;
 
-  @Column({ name: 'deleted_at', type: 'bigint', default: 0 })
+  @Column({ name: 'deleted_at', type: 'bigint', default: null })
   deletedAt: number;
 }
