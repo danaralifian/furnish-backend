@@ -13,6 +13,7 @@ import { Category } from './categories/entities/category.entity';
 import { CheckoutModule } from './checkout/checkout.module';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
+import { InvoicesModule } from './invoices/invoices.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { Order } from './orders/entities/order.entity';
     CategoriesModule,
     CheckoutModule,
     OrdersModule,
+    InvoicesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

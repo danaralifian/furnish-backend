@@ -5,15 +5,15 @@ export class BaseDto {
   @Expose()
   id: number;
 
-  @Expose({ name: 'created_at' })
+  @Expose()
   @ToNumber()
   createdAt: number;
 
-  @Expose({ name: 'updated_at' })
+  @Expose()
   @ToNumber()
   updatedAt: number;
 
-  @Expose({ name: 'deleted_at' })
+  @Expose()
   @ToNumber()
   deletedAt: number;
 }

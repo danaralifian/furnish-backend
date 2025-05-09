@@ -1,6 +1,6 @@
 import { BeforeInsert, Column } from 'typeorm';
 
-export class BaseEntity {
+export class BaseColumnEntity {
   @Column({ name: 'created_at', type: 'bigint', default: 0 })
   createdAt: number;
 
