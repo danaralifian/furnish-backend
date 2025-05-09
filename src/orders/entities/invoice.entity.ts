@@ -9,10 +9,10 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('invoices-test')
+@Entity('invoices')
 export class Invoice {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })

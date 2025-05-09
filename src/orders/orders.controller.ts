@@ -9,14 +9,15 @@ import {
   UseGuards,
   Request,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { OrderDto } from './dto/order.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/shared/enum/roles';
 import { UserDto } from 'src/users/dto/user.dto';
+import { CreateOrderDto } from './dto/create.order.dto';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,12 +25,12 @@ import { UserDto } from 'src/users/dto/user.dto';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @HttpCode(200)
   @Post()
   create(
     @Request() req: Express.Request & { user: UserDto },
-    @Body() createOrderDto: OrderDto,
+    @Body() createOrderDto: CreateOrderDto,
   ) {
-    console.log(req.user);
     return this.ordersService.create(createOrderDto, req.user);
   }
 
@@ -48,8 +49,8 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: OrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
+  update(@Param('id') id: string) {
+    return this.ordersService.update(+id);
   }
 
   @Delete(':id')

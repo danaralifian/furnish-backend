@@ -4,12 +4,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Invoice } from './invoice.entity';
 import { ORDER_STATUS } from 'src/shared/enum/order-status';
+import { OrderItem } from './order-item.entity';
 
-@Entity('orders-test')
+@Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,11 +23,20 @@ export class Order {
   @JoinColumn({ name: 'invoice_id' }) // This tells TypeORM to add a invoice_id column here
   invoice: Invoice;
 
+  @OneToMany(() => OrderItem, (item) => item.order)
+  orderItems: OrderItem[];
+
   @Column({ type: 'enum', enum: ORDER_STATUS, default: ORDER_STATUS.PENDING })
   status: ORDER_STATUS;
 
-  @Column({ name: 'total_amount', type: 'decimal', precision: 12, scale: 2 })
-  totalAmount: number;
+  @Column({ name: 'sub_total', type: 'decimal', precision: 12, scale: 2 })
+  subTotal: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  tax: number;
+
+  @Column({ name: 'total', type: 'decimal', precision: 12, scale: 2 })
+  total: number;
 
   @Column({ name: 'created_at', type: 'bigint', default: 0 })
   createdAt: number;

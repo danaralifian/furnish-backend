@@ -8,5 +8,6 @@ import { ProductsModule } from 'src/products/products.module';
   imports: [TypeOrmModule.forFeature([]), ProductsModule],
   controllers: [CheckoutController],
   providers: [CheckoutService],
+  exports: [CheckoutService],
 })
 export class CheckoutModule {}
