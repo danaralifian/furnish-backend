@@ -124,10 +124,15 @@ export class OrdersService {
   ): Promise<IResponse<OrderDto>> {
     const skip = (page - 1) * limit; //offset
     const [orders, total] = await this.orderRepository.findAndCount({
+      where: {
+        user: {
+          id: user.id,
+        },
+      },
       take: limit,
       skip,
       order: { createdAt: 'DESC' }, // optional: latest first
-      relations: ['user', 'invoice'],
+      relations: ['items', 'items.product'],
     });
 
     const pagination = calculatePagination(total, page, limit);
