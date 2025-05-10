@@ -139,8 +139,17 @@ export class OrdersService {
     return formatResponse(orders, OrderDto, pagination);
   }
 
-  findOne(id: number) {
-    return { id };
+  async findOne(user: UserDto, id: number): Promise<IResponse<OrderDto>> {
+    const order = await this.orderRepository.findOne({
+      where: { user: { id: user.id }, id },
+      relations: ['items', 'items.product'],
+    });
+
+    console.log(order);
+
+    if (!order) throw new Error(`Order ID ${id} not found`);
+
+    return formatResponse(order, OrderDto);
   }
 
   update(id: number) {

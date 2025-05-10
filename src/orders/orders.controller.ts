@@ -16,8 +16,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/shared/enum/roles';
-import { UserDto } from 'src/users/dto/user.dto';
 import { CreateOrderDto } from './dto/create.order.dto';
+import { IRequest } from 'src/shared/interfaces/request';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -27,16 +27,13 @@ export class OrdersController {
 
   @HttpCode(200)
   @Post()
-  create(
-    @Request() req: Express.Request & { user: UserDto },
-    @Body() createOrderDto: CreateOrderDto,
-  ) {
+  create(@Request() req: IRequest, @Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto, req.user);
   }
 
   @Get()
   findAll(
-    @Request() req: Express.Request & { user: UserDto },
+    @Request() req: IRequest,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
@@ -44,8 +41,8 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  findOne(@Request() req: IRequest, @Param('id') id: string) {
+    return this.ordersService.findOne(req.user, +id);
   }
 
   @Patch(':id')
