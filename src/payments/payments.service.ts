@@ -8,6 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
+import { PAYMENT_STATUS } from 'src/shared/enum/payment-status';
 
 @Injectable()
 export class PaymentsService {
@@ -57,10 +58,16 @@ export class PaymentsService {
 
       const createdBill = (await response.json()) as PaymentProviderResponseDto;
 
-      return plainToInstance(PaymentProviderResponseDto, {
-        ...createdBill,
-        provider: createBillDto.provider,
-      });
+      return plainToInstance(
+        PaymentProviderResponseDto,
+        {
+          ...createdBill,
+          provider: createBillDto.provider,
+        },
+        {
+          excludeExtraneousValues: true,
+        },
+      );
     } catch (err) {
       console.error('Error creating invoice:', err);
       throw err;
@@ -77,5 +84,36 @@ export class PaymentsService {
   async create(createPaymentDto: PaymentDto): Promise<IResponse<PaymentDto>> {
     const createdPayment = await this.paymentRepository.save(createPaymentDto);
     return formatResponse(createdPayment, PaymentDto);
+  }
+
+  async makeBill(paymentHook: PaymentDto): Promise<IResponse<PaymentDto>> {
+    const data = plainToInstance(CreateBillDto, paymentHook, {
+      excludeExtraneousValues: true,
+    });
+
+    //create payment bill using payment gateway
+    const bill = await this.createBill({
+      amount: data.amount,
+      description: `Invoice ID ${data.externalId}`,
+      externalId: data.externalId,
+      payerEmail: data.payerEmail,
+      provider: data.provider,
+    });
+
+    const payment = await this.paymentRepository.update(
+      { externalId: data.externalId },
+      {
+        ...plainToInstance(PaymentDto, bill),
+        status: PAYMENT_STATUS.WAITING_PAYMENT,
+      },
+    );
+
+    const getPayment = await this.paymentRepository.findOne({
+      where: { externalId: data.externalId },
+    });
+
+    console.log(data, payment, 'test');
+
+    return formatResponse(getPayment, PaymentDto);
   }
 }

@@ -17,6 +17,7 @@ import { Product } from 'src/products/entities/product.entity';
 import { InvoicesService } from 'src/invoices/invoices.service';
 import { InvoiceResponseDto } from 'src/invoices/dto/invoice.response.dto';
 import { Payment } from 'src/payments/entities/payment.entity';
+import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
 
 @Injectable()
 export class OrdersService {
@@ -109,6 +110,8 @@ export class OrdersService {
         amount: summary.totalAmount,
         externalId: invoice.invoiceId,
         invoice,
+        provider: PAYMENT_PROVIDER.XENDIT,
+        description: `Invoice ID ${invoice.invoiceId}`,
       });
 
       //save payment
