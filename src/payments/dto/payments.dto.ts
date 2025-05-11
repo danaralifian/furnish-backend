@@ -39,7 +39,7 @@ export class PaymentDto extends BaseDto {
   paidAt: number;
 
   @Expose()
-  expireAt: number;
+  expiryDate: number;
 
   @Expose()
   invoiceId: number; // opsional, jika kamu ingin include invoice ID-nya

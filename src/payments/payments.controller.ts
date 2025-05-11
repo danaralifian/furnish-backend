@@ -9,10 +9,16 @@ import {
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentDto } from './dto/payments.dto';
+import { CreateBillDto } from './dto/create-bill.dto';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
+
+  @Post('create-bill-test')
+  createBill(@Body() createBill: CreateBillDto) {
+    return this.paymentsService.createBill(createBill);
+  }
 
   @Post()
   create(@Body() createPaymentDto: PaymentDto) {

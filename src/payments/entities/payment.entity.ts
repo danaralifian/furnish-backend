@@ -22,6 +22,9 @@ export class Payment extends BaseColumnEntity {
   @Column({ name: 'payment_method_name', type: 'varchar', length: 50 })
   paymentMethodName: string;
 
+  @Column({ name: 'payment_method_type', type: 'varchar', length: 50 })
+  paymentMethodType: string;
+
   @Column({ name: 'payment_id', type: 'varchar', length: 150 }) // payment_id from provider
   paymentId: string;
 
@@ -43,8 +46,8 @@ export class Payment extends BaseColumnEntity {
   @Column({ name: 'paid_at', type: 'bigint' })
   paidAt: number;
 
-  @Column({ name: 'expire_at', type: 'bigint' })
-  expireAt: number;
+  @Column({ name: 'expiry_date', type: 'bigint' })
+  expiryDate: number;
 
   @OneToOne(() => Invoice, (invoice) => invoice.id)
   invoice: Invoice;
