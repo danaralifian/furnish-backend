@@ -1,13 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { PaymentDto } from './dto/payments.dto';
 import { CreateBillDto } from './dto/create-bill.dto';
-import { PaymentProvidderResponseDto } from './dto/payment-provider-response.dto';
+import { PaymentProviderResponseDto } from './dto/payment-provider-response.dto';
+import { IResponse } from 'src/shared/interfaces/response';
+import { formatResponse } from 'src/common/helpers/format-response';
+import { plainToInstance } from 'class-transformer';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Payment } from './entities/payment.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PaymentsService {
+  constructor(
+    @InjectRepository(Payment)
+    private readonly paymentRepository: Repository<Payment>,
+  ) {}
+
   async createBill(
     createBillDto: CreateBillDto,
-  ): Promise<PaymentProvidderResponseDto> {
+  ): Promise<PaymentProviderResponseDto> {
     const username = process.env.XENDIT_SECRET_KEY;
     const password = '';
 
@@ -20,8 +31,8 @@ export class PaymentsService {
       amount: createBillDto.amount,
       payer_email: createBillDto.payerEmail,
       description: createBillDto.description,
-      success_redirect_url: createBillDto.successRedirectUrl,
-      failure_redirect_url: createBillDto.failureRedirectUrl,
+      success_redirect_url: process.env.PAYMENT_SUCCESS_REDIRECT_URL,
+      failure_redirect_url: process.env.PAYMENT_FAILURE_REDIRECT_URL,
       merchant_name: process.env.MERCHANT_NAME,
       merchant_profile_picture_url: process.env.MERCHANT_ICON,
     };
@@ -44,19 +55,28 @@ export class PaymentsService {
         throw new Error(`Xendit API Error: ${response.status} - ${error}`);
       }
 
-      const createdBill =
-        (await response.json()) as PaymentProvidderResponseDto;
+      const createdBill = (await response.json()) as PaymentProviderResponseDto;
 
-      return createdBill;
+      return plainToInstance(PaymentProviderResponseDto, {
+        ...createdBill,
+        provider: createBillDto.provider,
+      });
     } catch (err) {
       console.error('Error creating invoice:', err);
       throw err;
     }
   }
 
-  create(createPaymentDto: PaymentDto) {
-    console.log(createPaymentDto);
-    return 'This action adds a new payment';
+  async createBillTest(
+    createBillDto: CreateBillDto,
+  ): Promise<IResponse<PaymentProviderResponseDto>> {
+    const createdBill = await this.createBill(createBillDto);
+    return formatResponse(createdBill, PaymentProviderResponseDto);
+  }
+
+  async create(createPaymentDto: PaymentDto): Promise<IResponse<PaymentDto>> {
+    const createdPayment = await this.paymentRepository.save(createPaymentDto);
+    return formatResponse(createdPayment, PaymentDto);
   }
 
   findAll() {

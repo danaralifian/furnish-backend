@@ -1,14 +1,24 @@
 import { Invoice } from 'src/invoices/entities/invoice.entity';
 import { BaseColumnEntity } from 'src/shared/entities/base.column.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('payments')
 export class Payment extends BaseColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50 })
-  provider: string;
+  @Column({ name: 'payment_provider_id', type: 'varchar', length: 50 })
+  paymentProviderId: string;
+
+  @Column({ type: 'enum', enum: PAYMENT_PROVIDER })
+  provider: PAYMENT_PROVIDER;
 
   @Column({ type: 'varchar', length: 255 })
   description: string;
@@ -16,17 +26,24 @@ export class Payment extends BaseColumnEntity {
   @Column({ name: 'external_id', type: 'varchar', length: 100 })
   externalId: string;
 
-  @Column({ type: 'varchar', length: 50 }) //status from provider
+  @Column({ type: 'varchar', length: 50 })
   status: string;
 
-  @Column({ name: 'payment_method_name', type: 'varchar', length: 50 })
+  @Column({
+    name: 'payment_method_name',
+    type: 'varchar',
+    length: 50,
+    default: null,
+  })
   paymentMethodName: string;
 
-  @Column({ name: 'payment_method_type', type: 'varchar', length: 50 })
+  @Column({
+    name: 'payment_method_type',
+    type: 'varchar',
+    length: 50,
+    default: null,
+  })
   paymentMethodType: string;
-
-  @Column({ name: 'payment_id', type: 'varchar', length: 150 }) // payment_id from provider
-  paymentId: string;
 
   @Column({ name: 'invoice_url', type: 'varchar', length: 255 })
   invoiceUrl: string;
@@ -43,12 +60,13 @@ export class Payment extends BaseColumnEntity {
   @Column({ type: 'bigint' })
   amount: number;
 
-  @Column({ name: 'paid_at', type: 'bigint' })
+  @Column({ name: 'paid_at', type: 'bigint', default: null })
   paidAt: number;
 
-  @Column({ name: 'expiry_date', type: 'bigint' })
+  @Column({ name: 'expiry_date', type: 'timestamp' })
   expiryDate: number;
 
   @OneToOne(() => Invoice, (invoice) => invoice.id)
+  @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 }

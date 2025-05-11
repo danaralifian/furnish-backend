@@ -16,12 +16,12 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-bill-test')
-  createBill(@Body() createBill: CreateBillDto) {
-    return this.paymentsService.createBill(createBill);
+  createBillTest(@Body() createBill: CreateBillDto) {
+    return this.paymentsService.createBillTest(createBill);
   }
 
-  @Post()
-  create(@Body() createPaymentDto: PaymentDto) {
+  @Post('create-manual-payment')
+  createManualPayment(@Body() createPaymentDto: PaymentDto) {
     return this.paymentsService.create(createPaymentDto);
   }
 

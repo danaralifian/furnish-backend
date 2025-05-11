@@ -1,7 +1,12 @@
 import { Expose } from 'class-transformer';
 import { IsNotEmpty, Min } from 'class-validator';
+import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
 
 export class CreateBillDto {
+  @IsNotEmpty()
+  @Expose()
+  provider: PAYMENT_PROVIDER;
+
   @IsNotEmpty()
   @Expose({ name: 'external_id' })
   externalId: string; //use order id
@@ -16,10 +21,4 @@ export class CreateBillDto {
 
   @Expose()
   description: string;
-
-  @Expose({ name: 'success_redirect_url' })
-  successRedirectUrl: string;
-
-  @Expose({ name: 'failure_redirect_url' })
-  failureRedirectUrl: string;
 }

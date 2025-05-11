@@ -16,6 +16,8 @@ import { CheckoutService } from 'src/checkout/checkout.service';
 import { Product } from 'src/products/entities/product.entity';
 import { InvoicesService } from 'src/invoices/invoices.service';
 import { InvoiceResponseDto } from 'src/invoices/dto/invoice.response.dto';
+import { PaymentsService } from 'src/payments/payments.service';
+import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +29,7 @@ export class OrdersService {
 
     private readonly checkoutService: CheckoutService,
     private readonly invoiceService: InvoicesService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   async create(
@@ -48,6 +51,7 @@ export class OrdersService {
       invoice = queryRunner.manager.create(Invoice, {
         user,
         totalAmount: summary.totalAmount,
+        invoiceId: generateCustomId(PREFIX_GENERATED_ID.INVOICE),
       });
 
       // save invoice
@@ -55,15 +59,12 @@ export class OrdersService {
 
       //loop seller-level order
       for (const sellerOrder of summary.orders) {
-        //generate order id
-        const orderId = generateCustomId(PREFIX_GENERATED_ID.ORDER);
-
         //create order
         const order = queryRunner.manager.create(Order, {
           invoice,
           sellerId: sellerOrder.sellerId,
           user,
-          orderId,
+          orderId: generateCustomId(PREFIX_GENERATED_ID.ORDER),
           subTotal: sellerOrder.subTotal,
           tax: sellerOrder.tax,
           total: sellerOrder.total,
@@ -114,6 +115,21 @@ export class OrdersService {
       await queryRunner.release();
     }
 
+    //create payment bill using payment gateway
+    const createPaymentBill = await this.paymentsService.createBill({
+      amount: summary.totalAmount,
+      description: `Invoice ID ${invoice.invoiceId}`,
+      externalId: invoice.invoiceId,
+      payerEmail: user.email,
+      provider: PAYMENT_PROVIDER.XENDIT, // currently only use xendit
+    });
+
+    // create payment
+    await this.paymentsService.create({
+      ...createPaymentBill,
+      invoice,
+    });
+
     return await this.invoiceService.findOne(invoice.id);
   }
 
@@ -144,8 +160,6 @@ export class OrdersService {
       where: { user: { id: user.id }, id },
       relations: ['items', 'items.product'],
     });
-
-    console.log(order);
 
     if (!order) throw new Error(`Order ID ${id} not found`);
 

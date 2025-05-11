@@ -16,6 +16,16 @@ export class Invoice extends BaseColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({
+    name: 'invoice_id',
+    type: 'varchar',
+    length: 50,
+    unique: true,
+    nullable: true,
+    default: null,
+  })
+  invoiceId: string;
+
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'user_id' })
   user: User;

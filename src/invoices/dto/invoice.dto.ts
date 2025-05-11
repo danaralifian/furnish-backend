@@ -8,6 +8,9 @@ export class InvoiceDto extends BaseDto {
   status: INVOICE_STATUS;
 
   @Expose()
+  invoiceId: string;
+
+  @Expose()
   totalAmount: number;
 
   @Expose()

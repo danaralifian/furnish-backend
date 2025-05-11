@@ -3,17 +3,17 @@ import { ToNumber } from 'src/common/helpers/transformers';
 
 export class BaseDto {
   @Expose()
-  id: number;
+  id?: number;
 
   @Expose()
   @ToNumber()
-  createdAt: number;
+  createdAt?: number;
 
   @Expose()
   @ToNumber()
-  updatedAt: number;
+  updatedAt?: number;
 
   @Expose()
   @ToNumber()
-  deletedAt: number;
+  deletedAt?: number;
 }
