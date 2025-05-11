@@ -5,6 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from './entities/invoice.entity';
 import { Repository } from 'typeorm';
 import { formatResponse } from 'src/common/helpers/format-response';
+import { InvoiceDto } from './dto/invoice.dto';
+import { UserDto } from 'src/users/dto/user.dto';
+import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
 @Injectable()
 export class InvoicesService {
@@ -13,8 +16,26 @@ export class InvoicesService {
     private readonly invoiceRepository: Repository<Invoice>,
   ) {}
 
-  findAll() {
-    return `This action returns all invoices`;
+  async findAll(
+    user: UserDto,
+    page: number,
+    limit: number,
+  ): Promise<IResponse<InvoiceDto>> {
+    const skip = (page - 1) * limit; //offset
+    const [invoices, total] = await this.invoiceRepository.findAndCount({
+      where: {
+        user: {
+          id: user.id,
+        },
+      },
+      take: limit,
+      skip,
+      relations: ['user'],
+    });
+
+    const pagination = calculatePagination(total, page, limit);
+
+    return formatResponse(invoices, InvoiceDto, pagination);
   }
 
   async findOne(id: number): Promise<IResponse<InvoiceResponseDto>> {
