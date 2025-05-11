@@ -24,7 +24,7 @@ export class InvoicesService {
   async findOne(id: number): Promise<IResponse<InvoiceResponseDto>> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id },
-      relations: ['orders', 'orders.items', 'orders.items.product'],
+      relations: ['orders', 'orders.items', 'orders.items.product', 'payment'],
     });
 
     return formatResponse(invoice, InvoiceResponseDto);

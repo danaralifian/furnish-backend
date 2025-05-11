@@ -1,4 +1,5 @@
 import { Order } from 'src/orders/entities/order.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 import { BaseColumnEntity } from 'src/shared/entities/base.column.entity';
 import { INVOICE_STATUS } from 'src/shared/enum/invoice-status';
 import { User } from 'src/users/entities/user.entity';
@@ -8,6 +9,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -42,4 +44,7 @@ export class Invoice extends BaseColumnEntity {
 
   @Column({ name: 'total_amount', type: 'decimal', precision: 12, scale: 2 })
   totalAmount: number;
+
+  @OneToOne(() => Payment, (payment) => payment.invoice)
+  payment: Payment;
 }
