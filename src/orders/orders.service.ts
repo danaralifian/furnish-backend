@@ -18,6 +18,7 @@ import { InvoicesService } from 'src/invoices/invoices.service';
 import { InvoiceResponseDto } from 'src/invoices/dto/invoice.response.dto';
 import { PaymentsService } from 'src/payments/payments.service';
 import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Injectable()
 export class OrdersService {
@@ -106,6 +107,24 @@ export class OrdersService {
         }
       }
 
+      //create payment bill using payment gateway
+      const createPaymentBill = await this.paymentsService.createBill({
+        amount: summary.totalAmount,
+        description: `Invoice ID ${invoice.invoiceId}`,
+        externalId: invoice.invoiceId,
+        payerEmail: user.email,
+        provider: PAYMENT_PROVIDER.XENDIT, // currently only use xendit
+      });
+
+      //create payment
+      const payment = queryRunner.manager.create(Payment, {
+        ...createPaymentBill,
+        invoice,
+      });
+
+      //save payment
+      await queryRunner.manager.save(payment);
+
       //commit transaction
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -114,21 +133,6 @@ export class OrdersService {
     } finally {
       await queryRunner.release();
     }
-
-    //create payment bill using payment gateway
-    const createPaymentBill = await this.paymentsService.createBill({
-      amount: summary.totalAmount,
-      description: `Invoice ID ${invoice.invoiceId}`,
-      externalId: invoice.invoiceId,
-      payerEmail: user.email,
-      provider: PAYMENT_PROVIDER.XENDIT, // currently only use xendit
-    });
-
-    // create payment
-    await this.paymentsService.create({
-      ...createPaymentBill,
-      invoice,
-    });
 
     return await this.invoiceService.findOne(invoice.id);
   }
