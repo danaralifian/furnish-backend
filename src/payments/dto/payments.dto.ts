@@ -3,6 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 import { Invoice } from 'src/invoices/entities/invoice.entity';
 import { BaseDto } from 'src/shared/dto/base.dto';
 import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
+import { PAYMENT_STATUS } from 'src/shared/enum/payment-status';
 
 export class PaymentDto extends BaseDto {
   @IsNotEmpty()
@@ -23,7 +24,7 @@ export class PaymentDto extends BaseDto {
 
   @IsNotEmpty()
   @Expose()
-  status: string;
+  status: PAYMENT_STATUS;
 
   @Expose()
   paymentMethodName: string;
