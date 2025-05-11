@@ -13,10 +13,6 @@ export class InvoicesService {
     private readonly invoiceRepository: Repository<Invoice>,
   ) {}
 
-  create() {
-    return 'This action adds a new invoice';
-  }
-
   findAll() {
     return `This action returns all invoices`;
   }
@@ -28,13 +24,5 @@ export class InvoicesService {
     });
 
     return formatResponse(invoice, InvoiceResponseDto);
-  }
-
-  update(id: number) {
-    return `This action updates a #${id} invoice`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} invoice`;
   }
 }

@@ -78,21 +78,4 @@ export class PaymentsService {
     const createdPayment = await this.paymentRepository.save(createPaymentDto);
     return formatResponse(createdPayment, PaymentDto);
   }
-
-  findAll() {
-    return `This action returns all payments`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: PaymentDto) {
-    console.log(updatePaymentDto);
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
-  }
 }
