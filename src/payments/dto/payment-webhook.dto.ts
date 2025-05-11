@@ -15,7 +15,7 @@ export class paymentWebhookDto {
   @Expose()
   schema: 'public';
 
-  @Expose()
+  @Expose({ name: 'old_record' })
   @Type(() => PaymentDto)
-  old_record: null;
+  oldRecord: PaymentDto;
 }
