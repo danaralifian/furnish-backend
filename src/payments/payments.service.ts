@@ -26,12 +26,8 @@ export class PaymentsService {
     @InjectDataSource()
     private readonly dataSource: DataSource,
 
-    @InjectRepository(Invoice)
-    private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
-    @InjectRepository(Order)
-    private readonly orderRepository: Repository<Order>,
   ) {}
 
   async createPaymentInvoice(
