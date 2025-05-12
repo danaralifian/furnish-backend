@@ -1,7 +1,7 @@
 import { Expose, Type } from 'class-transformer';
 import { PaymentDto } from './payments.dto';
 
-export class paymentWebhookDto {
+export class PaymentWebhookDto {
   @Expose()
   type: string;
 

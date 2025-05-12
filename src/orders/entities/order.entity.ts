@@ -20,9 +20,6 @@ export class Order extends BaseColumnEntity {
   @Column({ name: 'order_id', type: 'varchar', length: 255, unique: true })
   orderId: string;
 
-  @Column({ name: 'invoice_id', type: 'int' })
-  invoiceId: number;
-
   @ManyToOne(() => Invoice, (invoice) => invoice.id)
   @JoinColumn({ name: 'invoice_id' }) // This tells TypeORM to add a invoice_id column here
   invoice: Invoice;

@@ -32,7 +32,11 @@ export class Payment extends BaseColumnEntity {
   @Column({ name: 'external_id', type: 'varchar', length: 100 })
   externalId: string;
 
-  @Column({ type: 'enum', enum: PAYMENT_STATUS, default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: PAYMENT_STATUS,
+    default: PAYMENT_STATUS.PENDING,
+  })
   status: PAYMENT_STATUS;
 
   @Column({

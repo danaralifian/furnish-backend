@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaymentDto } from './dto/payments.dto';
-import { CreateBillDto } from './dto/create-bill.dto';
+import { CreatePaymentInvoiceDto } from './dto/create-payment-invoice.dto';
 import { PaymentProviderResponseDto } from './dto/payment-provider-response.dto';
 import { IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
@@ -9,16 +9,25 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/shared/enum/payment-status';
+import { PaymentGatewayWebhookDto } from './dto/payment-gateway-webhook.dto';
+import { Invoice } from 'src/invoices/entities/invoice.entity';
+import { INVOICE_STATUS } from 'src/shared/enum/invoice-status';
+import { Order } from 'src/orders/entities/order.entity';
+import { ORDER_STATUS } from 'src/shared/enum/order-status';
 
 @Injectable()
 export class PaymentsService {
   constructor(
+    @InjectRepository(Invoice)
+    private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async createBill(
-    createBillDto: CreateBillDto,
+  async createPaymentInvoice(
+    createPayment: CreatePaymentInvoiceDto,
   ): Promise<PaymentProviderResponseDto> {
     const username = process.env.XENDIT_SECRET_KEY;
     const password = '';
@@ -28,10 +37,10 @@ export class PaymentsService {
     );
 
     const payload = {
-      external_id: createBillDto.externalId,
-      amount: createBillDto.amount,
-      payer_email: createBillDto.payerEmail,
-      description: createBillDto.description,
+      external_id: createPayment.externalId,
+      amount: createPayment.amount,
+      payer_email: createPayment.payerEmail,
+      description: createPayment.description,
       success_redirect_url: process.env.PAYMENT_SUCCESS_REDIRECT_URL,
       failure_redirect_url: process.env.PAYMENT_FAILURE_REDIRECT_URL,
       merchant_name: process.env.MERCHANT_NAME,
@@ -62,7 +71,7 @@ export class PaymentsService {
         PaymentProviderResponseDto,
         {
           ...createdBill,
-          provider: createBillDto.provider,
+          provider: createPayment.provider,
         },
         {
           excludeExtraneousValues: true,
@@ -74,10 +83,10 @@ export class PaymentsService {
     }
   }
 
-  async createBillTest(
-    createBillDto: CreateBillDto,
+  async createPaymentTest(
+    createPayment: CreatePaymentInvoiceDto,
   ): Promise<IResponse<PaymentProviderResponseDto>> {
-    const createdBill = await this.createBill(createBillDto);
+    const createdBill = await this.createPaymentInvoice(createPayment);
     return formatResponse(createdBill, PaymentProviderResponseDto);
   }
 
@@ -86,13 +95,15 @@ export class PaymentsService {
     return formatResponse(createdPayment, PaymentDto);
   }
 
-  async makeBill(paymentHook: PaymentDto): Promise<IResponse<PaymentDto>> {
-    const data = plainToInstance(CreateBillDto, paymentHook, {
+  async processSupabasePayment(
+    paymentHook: PaymentDto,
+  ): Promise<IResponse<PaymentDto>> {
+    const data = plainToInstance(CreatePaymentInvoiceDto, paymentHook, {
       excludeExtraneousValues: true,
     });
 
     //create payment bill using payment gateway
-    const bill = await this.createBill({
+    const bill = await this.createPaymentInvoice({
       amount: data.amount,
       description: `Invoice ID ${data.externalId}`,
       externalId: data.externalId,
@@ -100,7 +111,8 @@ export class PaymentsService {
       provider: data.provider,
     });
 
-    const payment = await this.paymentRepository.update(
+    // update payment
+    await this.paymentRepository.update(
       { externalId: data.externalId },
       {
         ...plainToInstance(PaymentDto, bill),
@@ -112,8 +124,62 @@ export class PaymentsService {
       where: { externalId: data.externalId },
     });
 
-    console.log(data, payment, 'test');
-
     return formatResponse(getPayment, PaymentDto);
+  }
+
+  async webhookPayment(
+    payment: PaymentGatewayWebhookDto,
+  ): Promise<IResponse<PaymentGatewayWebhookDto>> {
+    const data = await this.paymentRepository.findOneBy({
+      externalId: payment.externalId,
+    });
+
+    if (!data) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    // update status payment
+    await this.paymentRepository.update(
+      { externalId: payment.externalId },
+      {
+        status: payment.status,
+        paidAt: payment.paidAt ? new Date(payment.paidAt).getTime() : 0,
+        paymentMethodName: payment.paymentChannel,
+        paymentMethodType: payment.paymentMethod,
+      },
+    );
+
+    // update status invoice
+    await this.invoiceRepository.update(
+      { invoiceId: payment.externalId },
+      {
+        status: payment.status as unknown as INVOICE_STATUS,
+      },
+    );
+
+    // update status order
+    await this.orderRepository
+      .createQueryBuilder('order')
+      .update(Order)
+      .set({
+        status:
+          payment.status == PAYMENT_STATUS.PAID
+            ? ORDER_STATUS.PROCESSING
+            : ORDER_STATUS.CANCELLED,
+      })
+      .where(
+        `invoice_id IN (
+        SELECT i.id
+        FROM invoices i
+        WHERE i.invoice_id = :invoiceId
+      )  AND status = :pendingStatus`,
+      )
+      .setParameters({
+        invoiceId: payment.externalId,
+        pendingStatus: INVOICE_STATUS.PENDING,
+      })
+      .execute();
+
+    return formatResponse(payment, PaymentGatewayWebhookDto);
   }
 }

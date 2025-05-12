@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 import { IsNotEmpty, Min } from 'class-validator';
 import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
 
-export class CreateBillDto {
+export class CreatePaymentInvoiceDto {
   @IsNotEmpty()
   @Expose()
   provider: PAYMENT_PROVIDER;
