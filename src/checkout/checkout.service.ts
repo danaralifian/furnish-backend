@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CheckoutDto,
   CheckoutItem,
@@ -36,7 +36,8 @@ export class CheckoutService {
           where: { id: item.productId },
         });
 
-        if (!product) throw new Error(`Product ID ${item.productId} not found`);
+        if (!product)
+          throw new NotFoundException(`Product ID ${item.productId} not found`);
 
         const unitPrice = Number(product.price);
         const quantity = item.quantity;

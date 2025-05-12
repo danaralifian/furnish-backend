@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PaymentDto } from './dto/payments.dto';
 import { CreatePaymentInvoiceDto } from './dto/create-payment-invoice.dto';
 import { PaymentProviderResponseDto } from './dto/payment-provider-response.dto';
@@ -66,7 +70,9 @@ export class PaymentsService {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`Xendit API Error: ${response.status} - ${error}`);
+        throw new BadRequestException(
+          `Xendit API Error: ${response.status} - ${error}`,
+        );
       }
 
       const createdBill = (await response.json()) as PaymentProviderResponseDto;

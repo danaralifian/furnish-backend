@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { AddressDto } from './dto/address.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -54,6 +54,10 @@ export class AddressesService {
       user: { id: user.id },
     });
 
+    if (!address) {
+      throw new NotFoundException('Address not found');
+    }
+
     return formatResponse(address, AddressDto);
   }
 
@@ -74,7 +78,7 @@ export class AddressesService {
     const address = await this.addressRepository.findOneBy({ id });
 
     if (!address) {
-      throw new Error('Address not found');
+      throw new NotFoundException('Address not found');
     }
 
     return formatResponse(address, AddressDto);
@@ -96,7 +100,7 @@ export class AddressesService {
     const address = await this.addressRepository.findOneBy({ id });
 
     if (!address) {
-      throw new Error('Address not found');
+      throw new NotFoundException('Address not found');
     }
 
     return formatResponse({});

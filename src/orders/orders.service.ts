@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { OrderDto } from './dto/order.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
@@ -81,9 +85,13 @@ export class OrdersService {
           });
 
           if (!product)
-            throw new Error(`Product ID ${item.productId} not found`);
+            throw new NotFoundException(
+              `Product ID ${item.productId} not found`,
+            );
           if (product.stock < item.quantity)
-            throw new Error(`Product ID ${item.productId}, Out of stock`);
+            throw new BadRequestException(
+              `Product ID ${item.productId}, Out of stock`,
+            );
 
           //decrease stock
           product.stock -= item.quantity;
