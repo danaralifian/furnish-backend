@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CategoryDto } from './dto/category.dto';
-import { instanceToPlain } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
@@ -18,7 +18,7 @@ export class CategoriesService {
   async create(
     createCategoryDto: CategoryDto,
   ): Promise<IResponse<CategoryDto>> {
-    const category = instanceToPlain(createCategoryDto);
+    const category = plainToInstance(Category, createCategoryDto);
     const createdCategory = await this.categoryRepository.save(category);
 
     return formatResponse(createdCategory, CategoryDto);
@@ -49,7 +49,7 @@ export class CategoriesService {
     id: number,
     updateCategoryDto: CategoryDto,
   ): Promise<IResponse<CategoryDto>> {
-    const category = instanceToPlain(updateCategoryDto);
+    const category = plainToInstance(Category, updateCategoryDto);
     const updatedCategory = await this.categoryRepository.update(id, category);
     return formatResponse(updatedCategory, CategoryDto);
   }

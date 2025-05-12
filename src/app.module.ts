@@ -16,6 +16,9 @@ import { Order } from './orders/entities/order.entity';
 import { InvoicesModule } from './invoices/invoices.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { Address } from './addresses/entities/address.entity';
+import { Invoice } from './invoices/entities/invoice.entity';
+import { Payment } from './payments/entities/payment.entity';
 
 @Module({
   imports: [
@@ -32,7 +35,7 @@ import { AddressesModule } from './addresses/addresses.module';
       database: process.env.SUPABASE_DB,
       autoLoadEntities: process.env.SUPABASE_ENVIRONTMENT === 'development', // Set to false in production
       synchronize: true,
-      entities: [User, Product, Category, Order],
+      entities: [User, Product, Category, Order, Address, Invoice, Payment],
     }),
     UserModule,
     AuthModule,

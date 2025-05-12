@@ -4,7 +4,7 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { calculatePagination } from 'src/common/helpers/calculate-pagination';
 
-import { instanceToPlain } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { UserDto } from './dto/user.dto';
 import { IDelete, IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
@@ -26,7 +26,7 @@ export class UserService {
    * @returns promise of user
    */
   async create(createUserDto: UserDto): Promise<IResponse<UserDto>> {
-    const user = instanceToPlain(createUserDto);
+    const user = plainToInstance(User, createUserDto);
     const createdUser = await this.userRepository.save(user);
     return formatResponse(createdUser, UserDto);
   }
@@ -66,7 +66,7 @@ export class UserService {
     id: number,
     updateUserDto: UserDto,
   ): Promise<IResponse<UserDto>> {
-    const user = instanceToPlain(updateUserDto);
+    const user = plainToInstance(User, updateUserDto);
     await this.userRepository.update(id, user);
     const updatedUser = await this.userRepository.findOneBy({ id });
 

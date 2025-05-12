@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IDelete, IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
-import { instanceToPlain } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { UserDto } from 'src/users/dto/user.dto';
 import { getUnixTimestamp } from 'src/common/helpers/time';
 import { Address } from './entities/address.entity';
@@ -22,7 +22,7 @@ export class AddressesService {
     createAddressDto: AddressDto,
   ): Promise<IResponse<AddressDto>> {
     const address = await this.addressRepository.save(
-      instanceToPlain({
+      plainToInstance(Address, {
         ...createAddressDto,
         user,
       }),
@@ -73,7 +73,7 @@ export class AddressesService {
           id: user.id,
         },
       },
-      instanceToPlain(updateAddressDto),
+      plainToInstance(Address, updateAddressDto),
     );
     const address = await this.addressRepository.findOneBy({ id });
 
