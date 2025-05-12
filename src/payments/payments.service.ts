@@ -5,19 +5,23 @@ import { PaymentProviderResponseDto } from './dto/payment-provider-response.dto'
 import { IResponse } from 'src/shared/interfaces/response';
 import { formatResponse } from 'src/common/helpers/format-response';
 import { plainToInstance } from 'class-transformer';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Payment } from './entities/payment.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/shared/enum/payment-status';
 import { PaymentGatewayWebhookDto } from './dto/payment-gateway-webhook.dto';
 import { Invoice } from 'src/invoices/entities/invoice.entity';
 import { INVOICE_STATUS } from 'src/shared/enum/invoice-status';
 import { Order } from 'src/orders/entities/order.entity';
 import { ORDER_STATUS } from 'src/shared/enum/order-status';
+import { mapToInvoiceStatus } from 'src/common/helpers/map-status';
 
 @Injectable()
 export class PaymentsService {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
+
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectRepository(Payment)
@@ -130,55 +134,61 @@ export class PaymentsService {
   async webhookPayment(
     payment: PaymentGatewayWebhookDto,
   ): Promise<IResponse<PaymentGatewayWebhookDto>> {
-    const data = await this.paymentRepository.findOneBy({
-      externalId: payment.externalId,
+    await this.dataSource.transaction(async (manager) => {
+      const paymentSource = manager.getRepository(Payment);
+      const invoiceSource = manager.getRepository(Invoice);
+      const orderSource = manager.getRepository(Order);
+
+      const existingPayment = await paymentSource.findOneBy({
+        externalId: payment.externalId,
+      });
+
+      if (!existingPayment) {
+        throw new NotFoundException('Payment not found');
+      }
+
+      // update status payment
+      await paymentSource.update(
+        { externalId: payment.externalId },
+        {
+          status: payment.status,
+          paidAt: payment.paidAt ? new Date(payment.paidAt).getTime() : 0,
+          paymentMethodName: payment.paymentChannel,
+          paymentMethodType: payment.paymentMethod,
+        },
+      );
+
+      // update status invoice
+      await invoiceSource.update(
+        { invoiceId: payment.externalId },
+        {
+          status: mapToInvoiceStatus(payment.status),
+        },
+      );
+
+      // update status order
+      await orderSource
+        .createQueryBuilder('order')
+        .update(Order)
+        .set({
+          status:
+            payment.status == PAYMENT_STATUS.PAID
+              ? ORDER_STATUS.PROCESSING
+              : ORDER_STATUS.CANCELLED,
+        })
+        .where(
+          `invoice_id IN (
+      SELECT i.id
+      FROM invoices i
+      WHERE i.invoice_id = :invoiceId
+    )  AND status = :pendingStatus`,
+        )
+        .setParameters({
+          invoiceId: payment.externalId,
+          pendingStatus: INVOICE_STATUS.PENDING,
+        })
+        .execute();
     });
-
-    if (!data) {
-      throw new NotFoundException('Payment not found');
-    }
-
-    // update status payment
-    await this.paymentRepository.update(
-      { externalId: payment.externalId },
-      {
-        status: payment.status,
-        paidAt: payment.paidAt ? new Date(payment.paidAt).getTime() : 0,
-        paymentMethodName: payment.paymentChannel,
-        paymentMethodType: payment.paymentMethod,
-      },
-    );
-
-    // update status invoice
-    await this.invoiceRepository.update(
-      { invoiceId: payment.externalId },
-      {
-        status: payment.status as unknown as INVOICE_STATUS,
-      },
-    );
-
-    // update status order
-    await this.orderRepository
-      .createQueryBuilder('order')
-      .update(Order)
-      .set({
-        status:
-          payment.status == PAYMENT_STATUS.PAID
-            ? ORDER_STATUS.PROCESSING
-            : ORDER_STATUS.CANCELLED,
-      })
-      .where(
-        `invoice_id IN (
-        SELECT i.id
-        FROM invoices i
-        WHERE i.invoice_id = :invoiceId
-      )  AND status = :pendingStatus`,
-      )
-      .setParameters({
-        invoiceId: payment.externalId,
-        pendingStatus: INVOICE_STATUS.PENDING,
-      })
-      .execute();
 
     return formatResponse(payment, PaymentGatewayWebhookDto);
   }
