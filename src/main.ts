@@ -22,8 +22,10 @@ async function bootstrap() {
 
   // add sswagger
   const config = new DocumentBuilder()
-    .setTitle('Simple API')
-    .setDescription('This is documentaion for Simple API')
+    .setTitle('Furnish API')
+    .setDescription(
+      'API documentation for Furnish — a backend service powering the Furnish furniture e-commerce platform.',
+    )
     .setVersion('1.0')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
