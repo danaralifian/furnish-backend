@@ -12,6 +12,12 @@ This is the backend service for **Furnish**, a furniture ecommerce platform buil
 - 🗃️ ORM powered by [**TypeORM**](https://typeorm.io/)
 - 🔐 Secure authentication using [**JWT**](https://jwt.io/)
 
+### API Documentation
+
+Interactive API documentation is available via Swagger:
+
+🔗 https://furnish-backend-production.up.railway.app/swagger/docs
+
 ## Project setup
 
 ```bash
