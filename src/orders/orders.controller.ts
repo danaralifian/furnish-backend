@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   Request,
   Query,
@@ -43,15 +41,5 @@ export class OrdersController {
   @Get(':id')
   findOne(@Request() req: IRequest, @Param('id') id: string) {
     return this.ordersService.findOne(req.user, +id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.ordersService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
   }
 }

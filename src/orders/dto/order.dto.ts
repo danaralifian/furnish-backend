@@ -4,6 +4,7 @@ import { ORDER_STATUS } from 'src/shared/enum/order-status';
 import { UserDto } from 'src/users/dto/user.dto';
 import { OrderItemDto } from './order-item.dto';
 import { InvoiceDto } from 'src/invoices/dto/invoice.dto';
+import { OrderShippingDto } from './order-shipping.dto';
 
 export class OrderDto extends BaseDto {
   @Expose()
@@ -41,4 +42,8 @@ export class OrderDto extends BaseDto {
   @Expose()
   @Type(() => InvoiceDto)
   invoice: InvoiceDto;
+
+  @Expose()
+  @Type(() => OrderShippingDto)
+  shipping: OrderShippingDto;
 }

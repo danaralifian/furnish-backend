@@ -11,6 +11,7 @@ import { ORDER_STATUS } from 'src/shared/enum/order-status';
 import { OrderItem } from './order-item.entity';
 import { User } from 'src/users/entities/user.entity';
 import { BaseColumnEntity } from 'src/shared/entities/base.column.entity';
+import { OrderShipping } from './order-shippings';
 
 @Entity('orders')
 export class Order extends BaseColumnEntity {
@@ -45,4 +46,8 @@ export class Order extends BaseColumnEntity {
 
   @Column({ name: 'total', type: 'decimal', precision: 12, scale: 2 })
   total: number;
+
+  @ManyToOne(() => OrderShipping, (shipping) => shipping.id)
+  @JoinColumn({ name: 'shipping_id' })
+  shipping: OrderShipping;
 }

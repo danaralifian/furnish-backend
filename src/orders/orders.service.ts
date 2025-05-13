@@ -22,6 +22,8 @@ import { InvoicesService } from 'src/invoices/invoices.service';
 import { InvoiceResponseDto } from 'src/invoices/dto/invoice.response.dto';
 import { Payment } from 'src/payments/entities/payment.entity';
 import { PAYMENT_PROVIDER } from 'src/shared/enum/payment-provider';
+import { AddressesService } from 'src/addresses/addresses.service';
+import { OrderShipping } from './entities/order-shippings';
 
 @Injectable()
 export class OrdersService {
@@ -33,6 +35,7 @@ export class OrdersService {
 
     private readonly checkoutService: CheckoutService,
     private readonly invoiceService: InvoicesService,
+    private readonly addressesService: AddressesService,
   ) {}
 
   async create(
@@ -44,12 +47,28 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     let invoice = new Invoice();
+    let shipping = new OrderShipping();
 
     //calculate the total price of the order
     const summary =
       await this.checkoutService.calculateCheckoutSummary(createOrderDto);
 
     try {
+      // check existing address user
+      const foundAddress = (
+        await this.addressesService.findOne(createOrderDto.shippingId, user)
+      ).data;
+
+      if (!foundAddress) {
+        throw new BadRequestException('Shipping address not found');
+      }
+
+      // create order shipping
+      shipping = queryRunner.manager.create(OrderShipping, foundAddress);
+
+      // save order shipping
+      await queryRunner.manager.save(shipping);
+
       // create invoice
       invoice = queryRunner.manager.create(Invoice, {
         user,
@@ -71,6 +90,7 @@ export class OrdersService {
           subTotal: sellerOrder.subTotal,
           tax: sellerOrder.tax,
           total: sellerOrder.total,
+          shipping,
         });
 
         //save order
@@ -162,20 +182,17 @@ export class OrdersService {
   async findOne(user: UserDto, id: number): Promise<IResponse<OrderDto>> {
     const order = await this.orderRepository.findOne({
       where: { user: { id: user.id }, id },
-      relations: ['items', 'items.product', 'invoice', 'invoice.payment'],
+      relations: [
+        'items',
+        'items.product',
+        'invoice',
+        'invoice.payment',
+        'shipping',
+      ],
     });
 
     if (!order) throw new Error(`Order ID ${id} not found`);
-    console.log(order);
 
     return formatResponse(order, OrderDto);
-  }
-
-  update(id: number) {
-    return `This action updates a #${id} order`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
   }
 }
