@@ -191,7 +191,7 @@ export class OrdersService {
       ],
     });
 
-    if (!order) throw new Error(`Order ID ${id} not found`);
+    if (!order) throw new NotFoundException(`Order ID ${id} not found`);
 
     return formatResponse(order, OrderDto);
   }
