@@ -13,6 +13,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/shared/enum/roles';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('admin/users')
 export class AdminUserController {
@@ -21,6 +22,7 @@ export class AdminUserController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Create user' })
   create(@Body() createUserDto: UserDto) {
     return this.userService.create(createUserDto);
   }
@@ -28,6 +30,7 @@ export class AdminUserController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Update user' })
   update(@Param('id') id: string, @Body() updateUserDto: UserDto) {
     return this.userService.update(+id, updateUserDto);
   }
@@ -35,6 +38,7 @@ export class AdminUserController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin)
+  @ApiOperation({ summary: 'Remove user' })
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }

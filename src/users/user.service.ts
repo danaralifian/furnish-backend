@@ -50,6 +50,11 @@ export class UserService {
     return formatResponse(users, UserDto, pagination);
   }
 
+  async current(userDto: UserDto): Promise<IResponse<UserDto>> {
+    const user = await this.userRepository.findOneBy({ id: userDto.id });
+    return formatResponse(user, UserDto);
+  }
+
   async findOne(id: number): Promise<IResponse<UserDto>> {
     const user = await this.userRepository.findOneBy({ id });
     return formatResponse(user, UserDto);
