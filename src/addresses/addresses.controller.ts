@@ -17,6 +17,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/shared/enum/roles';
+import { ApiOperation } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.User)
@@ -25,11 +26,13 @@ export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Create address' })
   create(@Request() req: IRequest, @Body() createAddressDto: AddressDto) {
     return this.addressesService.create(req.user, createAddressDto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all addresses' })
   findAll(
     @Request() req: IRequest,
     @Query('page') page: number = 1,
@@ -39,11 +42,13 @@ export class AddressesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get address by id' })
   findOne(@Request() req: IRequest, @Param('id') id: string) {
     return this.addressesService.findOne(+id, req.user);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update address' })
   update(
     @Request() req: IRequest,
     @Param('id') id: string,
@@ -53,6 +58,7 @@ export class AddressesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete address' })
   remove(@Request() req: IRequest, @Param('id') id: string) {
     return this.addressesService.remove(+id, req.user);
   }

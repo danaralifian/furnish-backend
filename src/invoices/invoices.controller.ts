@@ -12,6 +12,7 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Role } from 'src/shared/enum/roles';
 import { IRequest } from 'src/shared/interfaces/request';
+import { ApiOperation } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.User)
@@ -20,6 +21,7 @@ export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all invoices' })
   findAll(
     @Request() req: IRequest,
     @Query('page') page: number = 1,
@@ -29,6 +31,7 @@ export class InvoicesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get invoice by id' })
   findOne(@Param('id') id: string) {
     return this.invoicesService.findOne(+id);
   }
