@@ -28,10 +28,7 @@ $ npm install
 
 ```bash
 # development
-$ npm run start:dev
-
-# development with hot-reload using Nodemon
-$ npm run start:dev
+$ npm run dev
 
 # production mode
 $ npm run start:prod
