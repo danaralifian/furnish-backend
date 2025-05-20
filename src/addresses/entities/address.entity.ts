@@ -13,6 +13,9 @@ export class Address extends BaseColumnEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'varchar', length: 100, default: null })
+  label: string;
+
   @Column({ name: 'recipient_name', type: 'varchar', length: 100 })
   recipientName: string;
 

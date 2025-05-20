@@ -7,6 +7,11 @@ export class AddressDto extends BaseDto {
   @Expose()
   @IsString()
   @IsNotEmpty()
+  label: string;
+
+  @Expose()
+  @IsString()
+  @IsNotEmpty()
   recipientName: string;
 
   @Expose()
