@@ -16,5 +16,8 @@ export class AuthDto {
   password: string;
 
   @Expose()
+  username: string;
+
+  @Expose()
   accessToken?: string;
 }
