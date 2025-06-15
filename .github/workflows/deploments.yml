@@ -3,20 +3,20 @@ name: Deploy to Alibaba VPS
 on:
   push:
     branches:
-      - development
+      - main
 
 env:
   APP_NAME: furnish-api
   IMAGE_NAME: furnish-backend
   CONTAINER_PORT: 5002
   HOST_PORT: 5002
-  ENVIRONMENT: development
+  ENVIRONMENT: production
   REPO_URL: git@github.com:danaralifian/furnish-backend.git
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: development
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -61,9 +61,9 @@ jobs:
             echo "📂 Changing to application directory: $APP_DIR"
             cd "$APP_DIR"
 
-            echo "📦 Pulling latest code from development..."
-            git checkout development
-            git pull origin development
+            echo "📦 Pulling latest code from main..."
+            git checkout main
+            git pull origin main
 
             echo "🐳 Building Docker image..."
             docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
