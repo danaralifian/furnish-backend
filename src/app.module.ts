@@ -28,12 +28,12 @@ import { Payment } from './payments/entities/payment.entity';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.SUPABASE_HOST,
-      port: Number(process.env.SUPABASE_PORT),
-      username: process.env.SUPABASE_USER,
-      password: process.env.SUPABASE_PASSWORD,
-      database: process.env.SUPABASE_DB,
-      autoLoadEntities: process.env.SUPABASE_ENVIRONTMENT === 'development', // Set to false in production
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_ENGINE,
+      autoLoadEntities: process.env.DB_ENVIRONTMENT === 'development', // Set to false in production
       synchronize: true,
       entities: [User, Product, Category, Order, Address, Invoice, Payment],
     }),

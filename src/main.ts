@@ -34,7 +34,7 @@ async function bootstrap() {
   // Enable CORS with default settings (allow all origins)
   app.enableCors();
 
-  await app.listen(process.env.PORT ?? 5001);
+  await app.listen(process.env.PORT ?? 5002);
 }
 
 bootstrap().catch((error) => {

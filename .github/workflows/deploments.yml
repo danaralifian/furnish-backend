@@ -1,0 +1,97 @@
+name: Deploy to Alibaba VPS
+
+on:
+  push:
+    branches:
+      - development
+
+env:
+  APP_NAME: furnish-api
+  IMAGE_NAME: furnish-backend
+  CONTAINER_PORT: 5002
+  HOST_PORT: 5002
+  ENVIRONMENT: development
+  REPO_URL: git@github.com:danaralifian/furnish-backend.git
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: development
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Set image tag with commit SHA
+        run: echo "IMAGE_TAG=dev-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Deploy to VPS via SSH
+        run: |
+          APP_DIR="/home/admin/${{ env.APP_NAME }}"
+          REPO_URL="${{ env.REPO_URL }}"
+
+          ssh -o StrictHostKeyChecking=no ${{ vars.VPS_USER }}@${{ secrets.VPS_HOST_ALIBABA }} << EOF
+            set -e
+
+            echo "🔐 Adding github.com to known_hosts..."
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+            echo "📂 Checking if folder $APP_DIR exists..."
+            if [ ! -d "$APP_DIR" ]; then
+              echo "🔗 Cloning repository from $REPO_URL"
+              git clone "$REPO_URL" "$APP_DIR"
+            fi
+
+            echo "📂 Changing to application directory: $APP_DIR"
+            cd "$APP_DIR"
+
+            echo "📦 Pulling latest code from development..."
+            git checkout development
+            git pull origin development
+
+            echo "🐳 Building Docker image..."
+            docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+
+            echo "🧹 Cleaning up old container..."
+            docker stop ${{ env.APP_NAME }} || true
+            docker rm ${{ env.APP_NAME }} || true
+
+            echo "🚀 Running new container..."
+            docker run -d \
+              --name ${{ env.APP_NAME }} \
+              -p ${{ env.HOST_PORT }}:${{ env.CONTAINER_PORT }} \
+              -e NODE_ENV=${{ env.ENVIRONMENT }} \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_ENGINE=${{ vars.DB_ENGINE }} \
+              -e DB_ENVIRONTMENT=${{ vars.DB_ENVIRONTMENT }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e JWT_EXPIRATION=${{ vars.JWT_EXPIRATION }} \
+              -e XENDIT_BASE_URL=${{ vars.XENDIT_BASE_URL }} \
+              -e XENDIT_SECRET_KEY=${{ secrets.XENDIT_SECRET_KEY }} \
+              -e MERCHANT_NAME=${{ vars.MERCHANT_NAME }} \
+              -e MERCHANT_ICON=${{ vars.MERCHANT_ICON }} \
+              -e PAYMENT_SUCCESS_REDIRECT_URL=${{ vars.PAYMENT_SUCCESS_REDIRECT_URL }} \
+              -e PAYMENT_FAILURE_REDIRECT_URL=${{ vars.PAYMENT_FAILURE_REDIRECT_URL }} \
+              ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+            echo "✅ Deployment completed!"
+          EOF
