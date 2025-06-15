@@ -8,7 +8,7 @@ This is the backend service for **Furnish**, a furniture ecommerce platform buil
 - 🧩 Database powered by [**Supabase**](https://supabase.com/)
 - 💳 Payment gateway integration using [**Xendit**](https://www.xendit.co/id/)
 - ⚙️ **Supabase webhook** triggers to automatically create invoices in Xendit when a new row is inserted into the `payments` table
-- 🚀 Deployment using [**Railway**](https://railway.com/)
+- 🚀 Deployment using **Docker**, **Alibaba Cloud (SAS)**, **Nginx**, and **GitHub Actions**
 - 🗃️ ORM powered by [**TypeORM**](https://typeorm.io/)
 - 🔐 Secure authentication using [**JWT**](https://jwt.io/)
 
@@ -16,7 +16,7 @@ This is the backend service for **Furnish**, a furniture ecommerce platform buil
 
 Interactive API documentation is available via Swagger:
 
-🔗 https://furnish-backend-production.up.railway.app/swagger/docs
+🔗 https://api.furnish.danar-alifian.xyz/swagger/docs
 
 ## Project setup
 
@@ -47,6 +47,18 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Deployment
+
+This project is deployed using:
+
+**Docker**: for containerizing the application.
+
+**Alibaba Cloud Simple Application Server (SAS)**: as the virtual private server (VPS) host.
+
+**Nginx**: as a reverse proxy to serve the NestJs app.
+
+**GitHub Actions**: for continuous integration and deployment **(CI/CD)**.
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
@@ -54,7 +66,7 @@ Check out a few resources that may come in handy when working with NestJS:
 - Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
 - For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
 - To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Deploy your application to Alibaba Cloud SAS with Docker, Nginx, and GitHub Actions for a scalable backend setup.
 - Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
 - Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
 - To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
@@ -67,6 +79,10 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Authors
+
+- [@danaralifian](https://www.linkedin.com/in/danar-alifian-1a1581174/)
 
 ## Authors
 
